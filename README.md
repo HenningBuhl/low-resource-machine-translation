@@ -102,6 +102,7 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Automated tests
 * Option to not save all preprocessed data to disk
 * Option to turn use `collate_fn` instead of loading all data into memory
+* Better class, method and argument documentation
 
 ### Quality of Life
 
