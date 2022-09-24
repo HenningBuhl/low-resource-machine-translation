@@ -4,6 +4,9 @@ experiments/runs/
 experiments/tokenizers/
 experiments/models/
 
+# Experiment python files.
+experiments/**.py
+
 # Results.
 qol/results/
 
