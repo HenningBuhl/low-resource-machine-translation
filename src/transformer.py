@@ -169,7 +169,7 @@ class Transformer(pl.LightningModule):
 
         return e_mask, d_mask
 
-    def translate(self, src_text, method='greedy', **kwargs): # If this is made to work with batch sizes greater than 1, some score calculations must be changed!
+    def translate(self, src_text, method='greedy', **kwargs): # TODO: if this is made to work with batch sizes greater than 1, some score calculations must be changed!
         self.eval()
 
         tokenized = self.src_tokenizer.EncodeAsIds(src_text)
