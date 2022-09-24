@@ -1,3 +1,30 @@
+# Experiment folders.
+experiments/data/
+experiments/runs/
+experiments/tokenizers/
+experiments/models/
+
+# Results.
+qol/results/
+
+# qsub files.
+experiments/*.o*
+experiments/*.e*
+experiments/qsub
+
+# Jupyter.
+experiments/.ipynb_checkpoints/
+
+# Python cache.
+src/__pycache__/
+qol/__pycache__/
+
+
+
+###########################
+# GitHub Python gitingore #
+###########################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
