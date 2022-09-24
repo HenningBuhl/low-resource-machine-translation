@@ -1,0 +1,9 @@
+torch==1.11.0
+numpy
+matplotlib
+pytorch_lightning
+sentencepiece
+sacrebleu
+jupyter
+tqdm
+datasets
