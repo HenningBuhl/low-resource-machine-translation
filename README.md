@@ -61,6 +61,50 @@ The usual workflow for running an experiment is to adjust the hyper parameters i
 
 ### Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet
 
+<details><summary>Results</summary>
+
+The experiments use the WikiMatrix [[4]](#4) dataset.
+
+| Language Pair  | Sentences |
+| -------------- | --------- |
+| German-Dutch   | 0.5M      |
+| Dutch-English  | 0.8M      |
+| German-English | 1.6M      |
+
+Several pivoting techniques were employed to test their effects on a simulated low-resource task. The first table shows the SacreBLEU scores of the models on the test data.
+
+| Number of Sentences | Baseline | DP       | SWP      | RSWP     |
+| ------------------- | -------- | -------- | -------- | -------- |
+| unlimited           | 36.525   | 37.082   | 37.052   | 37.367   |
+| 10k                 | 1.224    | 19.520   | 20.357   | 22.152   |
+| 20k                 | 4.850    | 23.341   | 23.583   | 24.683   |
+| 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
+| 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
+
+The second table shows the SacreBLEU scores on the flores benchmark.
+
+| Number of Sentences | Baseline | DP       | SWP      | RSWP     |
+| ------------------- | -------- | -------- | -------- | -------- |
+| unlimited           | 36.525   | 37.082   | 37.052   | 37.367   |
+| 10k                 | 1.224    | 19.520   | 20.357   | 22.152   |
+| 20k                 | 4.850    | 23.341   | 23.583   | 24.683   |
+| 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
+| 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
+
+The third table shows the scores on the tatoeba benchmark/challenge.
+
+| Number of Sentences | Baseline | DP       | SWP      | RSWP     |
+| ------------------- | -------- | -------- | -------- | -------- |
+| unlimited           | 36.525   | 37.082   | 37.052   | 37.367   |
+| 10k                 | 1.224    | 19.520   | 20.357   | 22.152   |
+| 20k                 | 4.850    | 23.341   | 23.583   | 24.683   |
+| 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
+| 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
+
+All models reach a reasonable score with unlimited sentences. The performance of the baseline is very low when only given a few thousand sentences. But the pivoting techniques can amend this problem, due to their pretraining on the (source-pivot) and (pivot-target).
+
+</details>
+
 ## Credit
 
 The following table shows sources that influenced the development of this repository.
@@ -71,6 +115,8 @@ The following table shows sources that influenced the development of this reposi
 | [[6]](#6) | Top-K and top-p filtering function |
 
 ## Contributing
+
+This repository is still in an early and immature state. It would be best if a certain quality standard is established first to make the code future proof.
 
 Here is a list of tasks that would help the progress of this repository and research:
 
@@ -89,7 +135,12 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Freeze only the encoder or decoder in direct pivoting to reduce the number of trained parameters (mitigate overfitting)
 * Intermediate representation (multi-lingual) in many-to-many translation [[1]](#1)
 * Phrase table injection [[1]](#1)
-* Zero-shot learning in many-to-many translation
+* Multilingual machine translation [[8]](#8) [[11]](#11)
+  * One-to-many
+  * Many-to-one
+  * Many-to-many
+  * English centric, non-english centric
+* Zero-shot learning in many-to-many translation [[9]](#9) [[10]](#10)
 * Adding speech into the translation directions
 * More elaborate many-to-many architectures [[7]](#7)
 * Transfer learning with pivot adapters [[2]](#2)
@@ -104,6 +155,20 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Option to turn use `collate_fn` instead of loading all data into memory
 * Better class, method and argument documentation
 * More model types and variations to compare transformer performance with other models
+* Add more metrics (e.g. ter, translation perplexity)
+* Non-autoregressive Transformer (NAT)
+* Attention variations of transformers
+* Speed-up techniques of transformers
+* Training options
+  * Soft labels
+  * Optimizer and its params
+  * Scheduling
+  * Dropout rate, etc.
+  * Early stopping (saving and using best model after ending training due to metric not improving for n epochs)
+* Different types of tokenizers
+  * Subword-based (bpe, unigram, word-piece)
+  * Word-based
+  * Character-based
 
 ### Quality of Life
 
@@ -116,6 +181,7 @@ If you find an error, a mistake, something does not work or you have an idea for
   * `argparse` should be used in the notebooks with default parameters so that parameters can be parsed without editing the notebook or the python file
 * All settings, parameters and results should be exported in a future proof, clean and unified format
 * Inference methods should work with batch_size > 1
+* Multi-GPU training
 
 ## License
 
@@ -130,3 +196,8 @@ This project uses an [MIT license](/LICENSE)
 * <a id="5">[5]</a> Pytorch Transformer Machine Translation (https://github.com/devjwsong/transformer-translator-pytorch)
 * <a id="6">[6]</a> Top-K and Top-p filtering (https://gist.github.com/thomwolf/1a5a29f6962089e871b94cbd09daf317)
 * <a id="7">[7]</a> Beyond English-Centric Multilingual Machine Translation (https://arxiv.org/pdf/1909.09524v1.pdf)
+* <a id="8">[8]</a> Multi-Way, Multilingual Neural Machine Translation with a Shared Attention Mechanism (https://arxiv.org/pdf/1601.01073.pdf)
+* <a id="9">[9]</a> Zero-Resource Translation with
+Multi-Lingual Neural Machine Translation (https://arxiv.org/pdf/1606.04164.pdf)
+* <a id="10">[10]</a> Google’s Multilingual Neural Machine Translation System: Enabling Zero-Shot Translation (https://arxiv.org/pdf/1611.04558.pdf)
+* <a id="11">[11]</a> MULTI-TASK SEQUENCE TO SEQUENCE LEARNING (https://arxiv.org/pdf/1511.06114.pdf)
