@@ -114,6 +114,8 @@ wiki_matrix_data_urls = {
     'de-en': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-en.txt.zip',
     'de-nl': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-nl.txt.zip',
     'en-nl': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/en-nl.txt.zip',
+    'de-sv': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-sv.txt.zip',
+    'en-sv': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/en-sv.txt.zip',
 }
 
 def process_src(text_list, src_tokenizer):
