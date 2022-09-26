@@ -121,6 +121,9 @@ This repository is still in an early and immature state. It would be best if a c
 Here is a list of tasks that would help the progress of this repository and research:
 
 * Perform existing (and future) experiments on different source-pivot-target triplets
+* Feedback
+* Feature requests
+* Bug reporting
 * Any task from the [To-Dos](#to-dos)
 
 If you find an error, a mistake, something does not work or you have an idea for a feature or an improvement - do not hesitate to create a GitHub issue on that topic.
@@ -150,7 +153,8 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Create a central hub for models and tokenizers that were produced with this repo (export format of parameters etc. should be made future proof first)
 * Datasets should be easily switchable (download+unzip or use local files) [WikiMatrix is currently hard coded]
 * Tokenizers should be trainable with any number of files
-* Automated tests
+* Unit tests (+ automatic execution via GitHub Actions)
+* Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
 * Option to not save all preprocessed data to disk
 * Option to turn use `collate_fn` instead of loading all data into memory
 * Better class, method and argument documentation
