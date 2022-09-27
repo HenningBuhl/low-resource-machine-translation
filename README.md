@@ -1,5 +1,7 @@
 # Low-Resource Machine Translation
 
+<b>!!! This repository is still in an early stage and needs some future-proofing and refactoring first !!!</b>
+
 ## Table of Contents
 
 * [Introduction](#introduction)
