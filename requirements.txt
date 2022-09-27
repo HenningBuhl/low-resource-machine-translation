@@ -7,3 +7,4 @@ sacrebleu
 jupyter
 tqdm
 datasets
+argparse
