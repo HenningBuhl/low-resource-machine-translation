@@ -36,9 +36,10 @@ class MetricLogger(LightningLoggerBase):
         # Save metrics dict as json.
         save_dict(dir, self.metrics, 'metrics')
         
+        # TODO enable/disable depending on arg.
         # Save list associated with each key to txt file.
         for k in self.keys:
-            value_str = ','.join(map(str, self.metrics[k]))
+            value_str = '\n'.join(map(str, self.metrics[k]))
             f = open(os.path.join(dir, f'{k}.txt'), 'w')
             f.write(value_str)
             f.close()
