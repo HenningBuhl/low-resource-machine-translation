@@ -21,6 +21,7 @@ def load_tokenizer(lang, other_lang, vocab_size=16000, character_coverage=1.0, m
         dataset_name = 'WikiMatrix'
         src_file = os.path.join('data', src_tgt_key, f'{dataset_name}.{src_tgt_key}.{lang}')
 
+        # TODO input can be a comma separated list.
         template = "--input={} \
                 --pad_id={} \
                 --bos_id={} \
