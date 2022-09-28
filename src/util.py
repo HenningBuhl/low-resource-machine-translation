@@ -11,6 +11,11 @@ def create_dir(dir):
         os.mkdir(dir)
         print(f'Dir "{dir}" does not exist, creating it.')
 
+# Create directories.
+def create_dirs(dirs):
+    for dir in dirs:
+        create_dir(dir)
+
 # Save a python dictionary.
 def save_dict(dir, dictionary, name):
     f = open(os.path.join(dir, f'{name}.json'), 'w')
@@ -21,6 +26,7 @@ def save_dict(dir, dictionary, name):
 def read_dict(dict_file):
     return json.load(open(dict_file))
 
+# TODO REMOVE (argparse is used instead)
 # Dictionary which is capable of dot-notation.
 class dotdict(dict):
     def __init__(self, *args, **kwargs):
