@@ -8,7 +8,7 @@
 * [Installation](#installation)
 * [Getting started](#getting-started)
 * [Results](#results)
-  * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with--german-dutch-english--as--source-pivot-target--triplet)
+  * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with-german-dutch-english-as-source-pivot-target-triplet)
 * [Credit](#credit)
 * [Contributing](#contributing)
 * [To-Dos](#to-dos)
@@ -33,7 +33,7 @@ Techniques that perform well in a low-resource setting are the focus. Pivoting i
 
 ## Installation
 
-It is recommended to setup a virtual environment with python version 3.10.4
+It is recommended to setup a virtual environment with miniconda (python version 3.10.4)
 
 ```
 conda create -n mt python=3.10.4
@@ -44,6 +44,12 @@ and install the requirements like this:
 ```
 pip install -r requirements.txt
 ```
+
+NOT YET DONE:
+The notebooks are designed to work in Google Colab (TODO add link). They work by either:
+
+1. Cloning the repository into your Google Drive root folder and opening a jupyter notebook (mount_drive=True).
+1. Just executing a notebook in Google Colab (mount_drive=False). Some operations in the notebooks require a lot of memory and Google Colab might crash if too much data needs to be processed in memory.
 
 ## Getting started
 
@@ -146,7 +152,7 @@ If you find an error, a mistake, something does not work or you have an idea for
   * Many-to-many
   * English centric, non-english centric
 * Zero-shot learning in many-to-many translation [[9]](#9) [[10]](#10)
-* Adding speech into the translation directions
+* Adding speech into the translation directions (zero shooting transcribing, even while translating)
 * More elaborate many-to-many architectures [[7]](#7)
 * Transfer learning with pivot adapters [[2]](#2)
 
