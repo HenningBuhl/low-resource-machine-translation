@@ -79,27 +79,7 @@ The experiments use the WikiMatrix [[4]](#4) dataset.
 | Dutch-English  | 0.8M      |
 | German-English | 1.6M      |
 
-Several pivoting techniques were employed to test their effects on a simulated low-resource task. The first table shows the SacreBLEU scores of the models on the test data.
-
-| Number of Sentences | Baseline | DP       | SWP      | RSWP     |
-| ------------------- | -------- | -------- | -------- | -------- |
-| unlimited           | 36.525   | 37.082   | 37.052   | 37.367   |
-| 10k                 | 1.224    | 19.520   | 20.357   | 22.152   |
-| 20k                 | 4.850    | 23.341   | 23.583   | 24.683   |
-| 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
-| 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
-
-The second table shows the SacreBLEU scores on the flores benchmark.
-
-| Number of Sentences | Baseline | DP       | SWP      | RSWP     |
-| ------------------- | -------- | -------- | -------- | -------- |
-| unlimited           | 36.525   | 37.082   | 37.052   | 37.367   |
-| 10k                 | 1.224    | 19.520   | 20.357   | 22.152   |
-| 20k                 | 4.850    | 23.341   | 23.583   | 24.683   |
-| 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
-| 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
-
-The third table shows the scores on the tatoeba benchmark/challenge.
+Several pivoting techniques were employed to test their effects on a simulated low-resource task. The table shows the SacreBLEU scores of the models on the test data.
 
 | Number of Sentences | Baseline | DP       | SWP      | RSWP     |
 | ------------------- | -------- | -------- | -------- | -------- |
@@ -158,6 +138,7 @@ If you find an error, a mistake, something does not work or you have an idea for
 
 ### Misc
 
++ Document code!
 * Create a central hub for models and tokenizers that were produced with this repo (export format of parameters etc. should be made future proof first)
 * Datasets should be easily switchable (download+unzip or use local files) [WikiMatrix is currently hard coded]
 * Tokenizers should be trainable with any number of files

@@ -1,49 +1,52 @@
 from constants import *
 from tqdm import tqdm
 from data import get_src_tgt_key
+from path_management import TokenizerPathManager
 
 import os
 import sentencepiece as spm
 
 
-def load_tokenizer(lang, other_lang, vocab_size=16000, character_coverage=1.0, model_type='unigram'):
-    tokenizer_path = os.path.join('./tokenizers', lang)
+class TokenizerBuilder():
+    def __init__(self, lang, data_dir, mono_data_dir):
+        self.lang = lang
+        self.data_dir = data_dir
+        self.mono_data_dir = mono_data_dir
 
-    if os.path.exists(tokenizer_path):
-        print('Tokenizer exists. Skipping training.')
-        tokenizer = spm.SentencePieceProcessor()
-        tokenizer.Load(f'{os.path.join(tokenizer_path, lang)}.model')
-        return tokenizer
-    else:
-        print('Training tokenizer...')
-        os.mkdir(tokenizer_path)
-        src_tgt_key = get_src_tgt_key(lang, other_lang)
-        dataset_name = 'WikiMatrix'
-        src_file = os.path.join('data', src_tgt_key, f'{dataset_name}.{src_tgt_key}.{lang}')
+        self.tpm = TokenizerPathManager(lang, data_dir, mono_data_dir)
 
-        # TODO input can be a comma separated list.
-        template = "--input={} \
-                --pad_id={} \
-                --bos_id={} \
-                --eos_id={} \
-                --unk_id={} \
-                --model_prefix={} \
-                --vocab_size={} \
-                --character_coverage={} \
-                --model_type={}"
+    def build(self, vocab_size=16000, character_coverage=1.0, model_type='unigram'):
+      if os.path.exists(self.tpm.tokenizer_path):
+          print('Tokenizer exists. Skipping training.')
+          tokenizer = spm.SentencePieceProcessor()
+          tokenizer.Load(f'{self.tpm.tokenizer_sp_path}.model')
+          return tokenizer
+      else:
+          print('Training tokenizer...')
+          os.mkdir(self.tpm.tokenizer_path)
 
-        config = template.format(src_file,
-                                pad_id,
-                                sos_id,
-                                eos_id,
-                                unk_id,
-                                os.path.join(tokenizer_path, lang),
-                                vocab_size,
-                                character_coverage,
-                                model_type)
+          template = "--input={} \
+                  --pad_id={} \
+                  --bos_id={} \
+                  --eos_id={} \
+                  --unk_id={} \
+                  --model_prefix={} \
+                  --vocab_size={} \
+                  --character_coverage={} \
+                  --model_type={}"
 
-        spm.SentencePieceTrainer.Train(config)
+          config = template.format(','.join(self.tpm.files),
+                                  pad_id,
+                                  sos_id,
+                                  eos_id,
+                                  unk_id,
+                                  self.tpm.tokenizer_sp_path,
+                                  vocab_size,
+                                  character_coverage,
+                                  model_type)
 
-        tokenizer = spm.SentencePieceProcessor()
-        tokenizer.Load(f'{os.path.join(tokenizer_path, lang)}.model')
-        return tokenizer
+          spm.SentencePieceTrainer.Train(config)
+
+          tokenizer = spm.SentencePieceProcessor()
+          tokenizer.Load(f'{self.tpm.tokenizer_sp_path}.model')
+          return tokenizer

@@ -13,20 +13,24 @@ import pytorch_lightning as pl
 import copy
 
 
+# TODO split in transformer and Seq2SeqModel?
 class Transformer(pl.LightningModule):
     def __init__(self,
                  src_tokenizer,
                  tgt_tokenizer,
                  learning_rate=1e-4,
+                 weight_decay=0,
                  num_layers=6,
                  d_model=512,
                  drop_out_rate=0.1,
                  num_heads=8,
                  d_ff=2048,
-                 weight_decay=0,
+                 track_score=True,
                  ):
         super().__init__()
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        
         d_k = d_model // num_heads
 
         self.src_tokenizer = src_tokenizer
@@ -42,14 +46,12 @@ class Transformer(pl.LightningModule):
         self.output_linear = nn.Linear(d_model, self.tgt_vocab_size)
         self.softmax = nn.LogSoftmax(dim=-1)
 
-        self.weight_decay = weight_decay
-
         # Metrics.
-        if track_score:  # TODO add argument.
+        self.track_score = track_score
+        if self.track_score:
             score_metric = load_metric('sacrebleu')
             self.score_metric = score_metric
 
-        self.skip_score = False
         self.init_params()
 
     def init_params(self):
@@ -129,13 +131,13 @@ class Transformer(pl.LightningModule):
             logits.reshape(-1, self.tgt_vocab_size),
             tgt_out.reshape(-1))
 
-        if self.skip_score:
-            score = 0
-        else:
+        if self.track_score:
             predictions = self.tgt_tokenizer.Decode(torch.max(logits, dim=2).indices.tolist())
             references = self.tgt_tokenizer.Decode(tgt_out.tolist())
             references = [[' ' if r is None or r == '' else r] for r in references] # Catch inability of sacrebleu metric to process empty string.
             score = self.score_metric.compute(predictions=predictions, references=references)['score']
+        else:
+            score = -1
 
         return loss, score
 

@@ -12,7 +12,7 @@ def create_dir(dir):
         print(f'Dir "{dir}" does not exist, creating it.')
 
 # Create directories.
-def create_dirs(dirs):
+def create_dirs(*dirs):
     for dir in dirs:
         create_dir(dir)
 
@@ -55,6 +55,8 @@ def is_notebook():
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
             return True   # Jupyter notebook or qtconsole
+        elif 'google.colab' in str(get_ipython()):
+            return True   # Google Colab
         elif shell == 'TerminalInteractiveShell':
             return False  # Terminal running IPython
         else:
