@@ -4,6 +4,7 @@ from constants import *
 from layers import *
 from data import pad_or_truncate
 from calc import top_k_top_p_filtering
+from datasets import load_metric
 
 import torch
 import heapq
@@ -22,7 +23,6 @@ class Transformer(pl.LightningModule):
                  drop_out_rate=0.1,
                  num_heads=8,
                  d_ff=2048,
-                 score_metric=None,
                  weight_decay=0,
                  ):
         super().__init__()
@@ -42,8 +42,12 @@ class Transformer(pl.LightningModule):
         self.output_linear = nn.Linear(d_model, self.tgt_vocab_size)
         self.softmax = nn.LogSoftmax(dim=-1)
 
-        self.score_metric = score_metric
         self.weight_decay = weight_decay
+
+        # Metrics.
+        if track_score:  # TODO add argument.
+            score_metric = load_metric('sacrebleu')
+            self.score_metric = score_metric
 
         self.skip_score = False
         self.init_params()
