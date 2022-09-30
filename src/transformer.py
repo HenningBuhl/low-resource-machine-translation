@@ -26,6 +26,7 @@ class Transformer(pl.LightningModule):
                  drop_out_rate=0.1,
                  num_heads=8,
                  d_ff=2048,
+                 max_len=128,
                  track_score=True,
                  ):
         super().__init__()
@@ -33,6 +34,7 @@ class Transformer(pl.LightningModule):
         self.weight_decay = weight_decay
         
         d_k = d_model // num_heads
+        self.max_len = max_len
 
         self.src_tokenizer = src_tokenizer
         self.tgt_tokenizer = tgt_tokenizer
@@ -179,7 +181,7 @@ class Transformer(pl.LightningModule):
         e_mask = (src_input != pad_id).unsqueeze(1)  # (B, 1, L)
         d_mask = (tgt_input != pad_id).unsqueeze(1)  # (B, 1, L)
 
-        nopeak_mask = torch.ones([1, max_len, max_len], dtype=torch.bool)  # (1, L, L)
+        nopeak_mask = torch.ones([1, self.max_len, self.max_len], dtype=torch.bool)  # (1, L, L)
         nopeak_mask = torch.tril(nopeak_mask).to(device)  # (1, L, L) to triangular shape
         d_mask = d_mask & nopeak_mask  # (B, L, L) padding false
 
@@ -189,7 +191,7 @@ class Transformer(pl.LightningModule):
         self.eval()
 
         tokenized = self.src_tokenizer.EncodeAsIds(src_text)
-        src = torch.LongTensor(pad_or_truncate(tokenized)).unsqueeze(0)
+        src = torch.LongTensor(pad_or_truncate(tokenized, self.max_len)).unsqueeze(0)
         e_mask = (src != pad_id).unsqueeze(1).to(device) # (1, 1, L)
         e_output = self.encode(src, e_mask) # (1, L, d_model)
 
@@ -209,23 +211,23 @@ class Transformer(pl.LightningModule):
 
         return translation
 
-    def beam_search(self, e_output, e_mask, beam_size):
+    def beam_search(self, e_output, e_mask, beam_size):  # TODO beam search should share code with the other inference methods.
         cur_queue = PriorityQueue()
         for k in range(beam_size):
             cur_queue.put(BeamNode(sos_id, -0.0, [sos_id]))
         
         finished_count = 0
         
-        for pos in range(max_len):
+        for pos in range(self.max_len):
             new_queue = PriorityQueue()
             for k in range(beam_size):
                 node = cur_queue.get()
                 if node.is_finished:
                     new_queue.put(node)
                 else:
-                    tgt_input = torch.LongTensor(node.decoded + [pad_id] * (max_len - len(node.decoded))).to(device) # (L)
+                    tgt_input = torch.LongTensor(node.decoded + [pad_id] * (self.max_len - len(node.decoded))).to(device) # (L)
                     d_mask = (tgt_input.unsqueeze(0) != pad_id).unsqueeze(1).to(device) # (1, 1, L)
-                    nopeak_mask = torch.ones([1, max_len, max_len], dtype=torch.bool).to(device)
+                    nopeak_mask = torch.ones([1, self.max_len, self.max_len], dtype=torch.bool).to(device)
                     nopeak_mask = torch.tril(nopeak_mask) # (1, L, L) to triangular shape
                     d_mask = d_mask & nopeak_mask # (1, L, L) padding false
                     
@@ -262,13 +264,13 @@ class Transformer(pl.LightningModule):
         return self.tgt_tokenizer.decode_ids(decoded_output)
 
     def top_k_top_p_sampling(self, e_output, e_mask, top_k=0, top_p=1.0, temperature=1.0):
-        last_words = torch.LongTensor([pad_id] * max_len).to(device) # (L)
+        last_words = torch.LongTensor([pad_id] * self.max_len).to(device) # (L)
         last_words[0] = sos_id # (L)
         cur_len = 1
 
-        for i in range(max_len):
+        for i in range(self.max_len):
             d_mask = (last_words.unsqueeze(0) != pad_id).unsqueeze(1).to(device) # (1, 1, L)
-            nopeak_mask = torch.ones([1, max_len, max_len], dtype=torch.bool).to(device)  # (1, L, L)
+            nopeak_mask = torch.ones([1, self.max_len, self.max_len], dtype=torch.bool).to(device)  # (1, L, L)
             nopeak_mask = torch.tril(nopeak_mask)  # (1, L, L) to triangular shape
             d_mask = d_mask & nopeak_mask  # (1, L, L) padding false
 
@@ -285,7 +287,7 @@ class Transformer(pl.LightningModule):
             probabilities = F.softmax(filtered_logits, dim=-1)
             last_word_id = torch.multinomial(probabilities, 1)
 
-            if i < max_len-1:
+            if i < self.max_len-1:
                 last_words[i+1] = last_word_id
                 cur_len += 1
             

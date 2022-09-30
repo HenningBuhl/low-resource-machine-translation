@@ -3,6 +3,8 @@ from constants import *
 from path_management import CONST_DATA_DIR, get_files, get_parallel_data_dir
 from util import *
 from torch.utils.data import DataLoader
+from functools import partial
+
 
 import torch
 import random
@@ -83,7 +85,7 @@ class PreProcessor():
         with open(self.tgt_val_file, 'w') as f: f.write(''.join(tgt_val_examples))
         with open(self.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
 
-    def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples):
+    def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len):
         # Load (train, val, test) sets.
         print('Loading split dat from disk.')
         with open(self.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
@@ -113,18 +115,19 @@ class PreProcessor():
             train_tokenized = train_tokenized[:max_examples]
 
         # Create data loaders.
-        train_datalaoder = DataLoader(train_tokenized, batch_size=batch_size, shuffle=shuffle, collate_fn=self.collate_fn)
-        val_dataloader = DataLoader(val_tokenized, batch_size=batch_size, shuffle=False, collate_fn=self.collate_fn)
-        test_dataloader = DataLoader(test_tokenized, batch_size=batch_size, shuffle=False, collate_fn=self.collate_fn)
+        fn = partial(self.collate_fn, max_len=max_len)
+        train_datalaoder = DataLoader(train_tokenized, batch_size=batch_size, shuffle=shuffle, collate_fn=fn)
+        val_dataloader = DataLoader(val_tokenized, batch_size=batch_size, shuffle=False, collate_fn=fn)
+        test_dataloader = DataLoader(test_tokenized, batch_size=batch_size, shuffle=False, collate_fn=fn)
 
         return train_datalaoder, val_dataloader, test_dataloader
 
-    def collate_fn(self, batch):
+    def collate_fn(self, batch, max_len):
         src_inputs, tgt_inputs, tgt_output = [], [], []
         for src, tgt in batch:
-            src_inputs.append(pad_or_truncate(src + [eos_id]))
-            tgt_inputs.append(pad_or_truncate([sos_id] + tgt))
-            tgt_output.append(pad_or_truncate(tgt + [eos_id]))
+            src_inputs.append(pad_or_truncate(src + [eos_id], max_len))
+            tgt_inputs.append(pad_or_truncate([sos_id] + tgt, max_len))
+            tgt_output.append(pad_or_truncate(tgt + [eos_id], max_len))
         return torch.LongTensor(src_inputs), torch.LongTensor(tgt_inputs), torch.LongTensor(tgt_output)
 
     def tokenize(self, text_list, tokenizer):
@@ -143,7 +146,7 @@ class PreProcessor():
         return sorted([os.path.join(dir, f) for f in files])
 
 
-def pad_or_truncate( tokens):
+def pad_or_truncate(tokens, max_len):
     if len(tokens) < max_len:
         left = max_len - len(tokens)
         padding = [pad_id] * left
