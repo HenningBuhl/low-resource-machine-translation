@@ -50,8 +50,8 @@ class MetricLogger(LightningLoggerBase):
         
         # Measuring training time.
         end = time.time()
-        training_time = end - self.start
-        self.metrics['training_time'] = training_time
+        elapsed_time = end - self.start
+        self.metrics['elapsed_time'] = elapsed_time
 
         # Save metrics dict as json.
         save_dict(file, self.metrics)

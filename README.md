@@ -22,14 +22,7 @@
 
 The motivation for this repository was to make experiments from these papers [[1]](#1) [[2]](#2) [[3]](#3) publicly available.
 
-Techniques that perform well in a low-resource setting are the focus. Pivoting is a method that can amend a low-resource situation. The concept of pivoting was the first milestone to implement, so the following experiments are available:
-
-* Training a baseline model
-* Evaluating a cascaded model
-* Training a direct pivoting model (DP)
-* Training a step-wise pivoting model (SWP)
-* Training a reverse-step-wise pivoting model (RSWP) [similar to step-wise pivoting, but the decoder is pre-trained and gets frozen in step 2 instead of the encoder]
-* Evaluating models on benchmarks
+Techniques that perform well in a low-resource setting are the focus. Pivoting is a method that can amend a low-resource situation. The concept of pivoting was the first milestone to implement:
 
 ## Installation
 
@@ -53,7 +46,27 @@ The notebooks are designed to work in Google Colab (TODO add link). They work by
 
 ## Getting started
 
-Put parallel corpus data into experiments/data/{src}-{tgt} (order can also be {tgt}-{src}) and monolingula data (optional, used for only for tokenizer training) into experiments/data/{lang}.
+Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into experiments/data/{lang}. The prepared data for de-nl and nl-en experiments might look like this (note that there is on folder for monolingial english data as it is optional):
+
+* experiments
+  * data
+    * de-nl
+      * de
+        * dataset-1.txt
+        * dataset-2.txt
+      * nl
+        * dataset-1.txt
+        * dataset-2.txt
+    * nl-en
+      * nl
+        * dataset-3.txt
+      * en
+        * dataset-3.txt
+    * de
+      * mono-data-1.txt
+      * mono-data-2.txt
+    * nl
+      * mono-data.txt
 
 The folder `experiments` contains notebook files for each experiment. An experiment will create a folder `experiments/runs/{EXPERIMENT}` where the arguments, results and models will be saved.
 
@@ -62,8 +75,6 @@ Each experiment is present as a notebook to enable quick prototyping and a more 
 ```
 jupyter nbconvert --to python EXPERIMENT.ipynb
 ```
-
-This is what happens in the .sh-scripts. These scripts were made to enable quick experiment execution with qsub on a remote machine or cluster.
 
 You can either run the python files with your arguments
 
@@ -171,7 +182,7 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Accessibility is important (make notebooks easily executable in google colab!)
 * Inference methods should work with batch_size > 1
 
-* Setup conventions (import order, documentation, etc...)
+* Setup conventions (import order, documentation, bool args strtobool and always positively formulated, etc...)
 * More model types and variations to compare transformer performance with other models
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers
