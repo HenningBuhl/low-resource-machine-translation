@@ -53,7 +53,9 @@ The notebooks are designed to work in Google Colab (TODO add link). They work by
 
 ## Getting started
 
-The folder `experiments` contains notebook files for each experiment. An experiment will create a folder `experiments/runs/{EXPERIMENT}` where hyper parameters, results and models will be saved.
+Put parallel corpus data into experiments/data/{src}-{tgt} (order can also be {tgt}-{src}) and monolingula data (optional, used for only for tokenizer training) into experiments/data/{lang}.
+
+The folder `experiments` contains notebook files for each experiment. An experiment will create a folder `experiments/runs/{EXPERIMENT}` where the arguments, results and models will be saved.
 
 Each experiment is present as a notebook to enable quick prototyping and a more neat presentation. A notebook can be converted into a python file with 
 
@@ -63,7 +65,23 @@ jupyter nbconvert --to python EXPERIMENT.ipynb
 
 This is what happens in the .sh-scripts. These scripts were made to enable quick experiment execution with qsub on a remote machine or cluster.
 
-The usual workflow for running an experiment is to adjust the hyper parameters in the jupyter notebook and then running it either directly, as a python file after converting it or passing it to a cluster with qsub.
+You can either run the python files with your arguments
+
+```
+python TrainBaseline.py --src-lang de --tgt-lang nl
+```
+
+or use the sh.scripts. The arguments become pascal-case for the sh-scripts.
+
+```
+bash TrainBaseline.sh SrcLang=de TgtLang=nl
+```
+
+The sh-scripts also support additional arguments:
+
+* SKIP_CONVERT: Skips the conversion of the notebook to a python file. This allows the python file to be manually edited and used without it being overwritten.
+* CONDA_PATH: The path of conda (uses miniconda default path if unspecified)
+* CONDA_ENV: The name of the conda env to use
 
 ## Results
 

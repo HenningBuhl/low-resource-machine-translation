@@ -69,53 +69,13 @@ class ModelPathManager():
         create_dir(self.metrics_dir)
 
 
-class DataPathManager():
-    '''A class managing all paths required for parallel data preparation.'''
-    def __init__(self, src_lang, tgt_lang, data_dir):
-        self.src_lang = src_lang
-        self.tgt_lang = tgt_lang
-        self.data_dir = data_dir
-
-        self.src_lang_dir = os.path.join(data_dir, src_lang)
-        self.tgt_lang_dir = os.path.join(data_dir, tgt_lang)
-
-        self.src_train_file = os.path.join(self.src_lang_dir, 'train.txt')
-        self.tgt_train_file = os.path.join(self.tgt_lang_dir, 'train.txt')
-        self.src_val_file = os.path.join(self.src_lang_dir, 'val.txt')
-        self.tgt_val_file = os.path.join(self.tgt_lang_dir, 'val.txt')
-        self.src_test_file = os.path.join(self.src_lang_dir, 'test.txt')
-        self.tgt_test_file = os.path.join(self.tgt_lang_dir, 'test.txt')
-
-        self.src_train_tokenized_file = os.path.join(self.src_lang_dir, 'train-tokenized.txt')
-        self.tgt_train_tokenized_file = os.path.join(self.tgt_lang_dir, 'train-tokenized.txt')
-        self.src_val_tokenized_file = os.path.join(self.src_lang_dir, 'val-tokenized.txt')
-        self.tgt_val_tokenized_file = os.path.join(self.tgt_lang_dir, 'val-tokenized.txt')
-        self.src_test_tokenized_file = os.path.join(self.src_lang_dir, 'test-tokenized.txt')
-        self.tgt_test_tokenized_file = os.path.join(self.tgt_lang_dir, 'test-tokenized.txt')
-
-        self.src_files = self.get_raw_files(self.src_lang_dir)
-        self.tgt_files = self.get_raw_files(self.tgt_lang_dir)
-
-    def get_raw_files(self, dir):
-        files = get_files(dir)
-        for f in ['train.txt', 'val.txt', 'test.txt', 'train-tokenized.txt', 'val-tokenized.txt', 'test-tokenized.txt']:
-            if f in files:
-              files.remove(f)
-        return sorted([os.path.join(dir, f) for f in files])
-
-class TokenizerPathManager():
-    '''A class managing all paths required for setting up a tokenizer'''
-    def __init__(self, lang, data_dir, mono_data_dir):
-        self.tokenizer_path = os.path.join(CONST_TOKENIZERS_DIR, lang)
-        self.tokenizer_sp_path = os.path.join(self.tokenizer_path, lang)
-
-        # Files for training.
-        train_file = os.path.join(data_dir, lang , 'train.txt')
-        val_file = os.path.join(data_dir, lang , 'val.txt')
-        mono_data_files = []
-        if mono_data_dir is not None:
-            mono_data_files = get_files(mono_data_dir)
-        self.files = [train_file] + [val_file] + mono_data_files
+def get_parallel_data_dir(src_lang, tgt_lang):
+    src_tgt_data = os.path.join(CONST_DATA_DIR, f'{src_lang}-{tgt_lang}')
+    tgt_src_data = os.path.join(CONST_DATA_DIR, f'{tgt_lang}-{src_lang}')
+    if os.path.exists(src_tgt_data):
+        return src_tgt_data
+    else:
+        return tgt_src_data
 
 def get_files(dir):
     '''Return all files that are present in a given directory.'''

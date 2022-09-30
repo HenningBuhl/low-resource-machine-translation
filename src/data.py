@@ -1,6 +1,6 @@
 from tqdm import tqdm
 from constants import *
-from path_management import DataPathManager
+from path_management import CONST_DATA_DIR, get_files, get_parallel_data_dir
 from util import *
 from torch.utils.data import DataLoader
 
@@ -12,15 +12,28 @@ import os
 class PreProcessor():
     '''A class handling preprocessing of a parallel data corpus.'''
 
-    def __init__(self, src_lang, tgt_lang, data_dir):
-        self.src_lang = src_lang
-        self.tgt_lang = tgt_lang
-        self.data_dir = data_dir
+    def __init__(self, src_lang, tgt_lang):
+        # Parallel corpus data dir.
+        data_dir = os.path.join(get_parallel_data_dir(src_lang, tgt_lang))
 
-        self.dpm = DataPathManager(self.src_lang, self.tgt_lang, self.data_dir)
+        # Language directories.
+        self.src_lang_dir = os.path.join(data_dir, src_lang)
+        self.tgt_lang_dir = os.path.join(data_dir, tgt_lang)
+
+        # Files paths.
+        self.src_train_file = os.path.join(self.src_lang_dir, 'train.txt')
+        self.tgt_train_file = os.path.join(self.tgt_lang_dir, 'train.txt')
+        self.src_val_file = os.path.join(self.src_lang_dir, 'val.txt')
+        self.tgt_val_file = os.path.join(self.tgt_lang_dir, 'val.txt')
+        self.src_test_file = os.path.join(self.src_lang_dir, 'test.txt')
+        self.tgt_test_file = os.path.join(self.tgt_lang_dir, 'test.txt')
+
+        # Raw language files.
+        self.src_files = self.get_raw_files(self.src_lang_dir)
+        self.tgt_files = self.get_raw_files(self.tgt_lang_dir)
 
         # Determine state of data in data dir.
-        self.data_already_split = os.path.exists(self.dpm.src_train_file)
+        self.data_already_split = os.path.exists(self.src_train_file)
 
     def split_data(self, shuffle, num_val_examples, num_test_examples, fresh_run):
         if self.data_already_split and not fresh_run:
@@ -30,13 +43,13 @@ class PreProcessor():
         # Gather sentences.
         print('Gathering data from src files.')
         src_sentences = []
-        for src_file in self.dpm.src_files:
+        for src_file in self.src_files:
             with open(src_file, 'r', encoding='utf8') as f:
                 src_sentences.extend(f.readlines())
 
         print('Gathering data from tgt files.')
         tgt_sentences = []
-        for tgt_file in self.dpm.tgt_files:
+        for tgt_file in self.tgt_files:
             with open(tgt_file, 'r', encoding='utf8') as f:
                 tgt_sentences.extend(f.readlines())
 
@@ -63,22 +76,22 @@ class PreProcessor():
         src_val_examples, tgt_val_examples = zip(*val_examples)
         src_test_examples, tgt_test_examples = zip(*test_examples)
 
-        with open(self.dpm.src_train_file, 'w') as f: f.write(''.join(src_train_examples))
-        with open(self.dpm.src_val_file, 'w') as f: f.write(''.join(src_val_examples))
-        with open(self.dpm.src_test_file, 'w') as f: f.write(''.join(src_test_examples))
-        with open(self.dpm.tgt_train_file, 'w') as f: f.write(''.join(tgt_train_examples))
-        with open(self.dpm.tgt_val_file, 'w') as f: f.write(''.join(tgt_val_examples))
-        with open(self.dpm.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
+        with open(self.src_train_file, 'w') as f: f.write(''.join(src_train_examples))
+        with open(self.src_val_file, 'w') as f: f.write(''.join(src_val_examples))
+        with open(self.src_test_file, 'w') as f: f.write(''.join(src_test_examples))
+        with open(self.tgt_train_file, 'w') as f: f.write(''.join(tgt_train_examples))
+        with open(self.tgt_val_file, 'w') as f: f.write(''.join(tgt_val_examples))
+        with open(self.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
 
     def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples):
         # Load (train, val, test) sets.
         print('Loading split dat from disk.')
-        with open(self.dpm.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
-        with open(self.dpm.src_val_file, 'r', encoding='utf8') as f: src_val_examples = f.readlines()
-        with open(self.dpm.src_test_file, 'r', encoding='utf8') as f: src_test_examples = f.readlines()
-        with open(self.dpm.tgt_train_file, 'r', encoding='utf8') as f: tgt_train_examples = f.readlines()
-        with open(self.dpm.tgt_val_file, 'r', encoding='utf8') as f: tgt_val_examples = f.readlines()
-        with open(self.dpm.tgt_test_file, 'r', encoding='utf8') as f: tgt_test_examples = f.readlines()
+        with open(self.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
+        with open(self.src_val_file, 'r', encoding='utf8') as f: src_val_examples = f.readlines()
+        with open(self.src_test_file, 'r', encoding='utf8') as f: src_test_examples = f.readlines()
+        with open(self.tgt_train_file, 'r', encoding='utf8') as f: tgt_train_examples = f.readlines()
+        with open(self.tgt_val_file, 'r', encoding='utf8') as f: tgt_val_examples = f.readlines()
+        with open(self.tgt_test_file, 'r', encoding='utf8') as f: tgt_test_examples = f.readlines()
 
         # Tokenize data.
         print('Tokenizing data.')
@@ -120,6 +133,14 @@ class PreProcessor():
             tokenized = tokenizer.EncodeAsIds(text.strip())
             tokenized_list.append(tokenized)
         return tokenized_list
+
+
+    def get_raw_files(self, dir):
+        files = get_files(dir)
+        for f in ['train.txt', 'val.txt', 'test.txt']:
+            if f in files:
+              files.remove(f)
+        return sorted([os.path.join(dir, f) for f in files])
 
 
 def pad_or_truncate( tokens):

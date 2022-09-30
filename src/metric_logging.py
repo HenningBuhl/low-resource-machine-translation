@@ -40,7 +40,7 @@ class MetricLogger(LightningLoggerBase):
         '''Saves all metrics in a combined json file and as separate txt files for each metric.'''
         
         # Remove epoch key (TODO why is it there in the first place?).
-        del self.metrics['epoch']
+        #del self.metrics['epoch']
 
         # Save list associated with each key to txt file.
         for k in self.metrics.keys():
