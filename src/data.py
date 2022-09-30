@@ -9,6 +9,7 @@ from functools import partial
 import torch
 import random
 import os
+import pickle
 
 
 class PreProcessor():
@@ -22,7 +23,7 @@ class PreProcessor():
         self.src_lang_dir = os.path.join(data_dir, src_lang)
         self.tgt_lang_dir = os.path.join(data_dir, tgt_lang)
 
-        # Files paths.
+        # Split data files.
         self.src_train_file = os.path.join(self.src_lang_dir, 'train.txt')
         self.tgt_train_file = os.path.join(self.tgt_lang_dir, 'train.txt')
         self.src_val_file = os.path.join(self.src_lang_dir, 'val.txt')
@@ -30,15 +31,20 @@ class PreProcessor():
         self.src_test_file = os.path.join(self.src_lang_dir, 'test.txt')
         self.tgt_test_file = os.path.join(self.tgt_lang_dir, 'test.txt')
 
+        # Tokenized data files.
+        self.src_tokenized_train_file = os.path.join(self.src_lang_dir, 'train-tokenized.pickle')
+        self.tgt_tokenized_train_file = os.path.join(self.tgt_lang_dir, 'train-tokenized.pickle')
+        self.src_tokenized_val_file = os.path.join(self.src_lang_dir, 'val-tokenized.pickle')
+        self.tgt_tokenized_val_file = os.path.join(self.tgt_lang_dir, 'val-tokenized.pickle')
+        self.src_tokenized_test_file = os.path.join(self.src_lang_dir, 'test-tokenized.pickle')
+        self.tgt_tokenized_test_file = os.path.join(self.tgt_lang_dir, 'test-tokenized.pickle')
+
         # Raw language files.
         self.src_files = self.get_raw_files(self.src_lang_dir)
         self.tgt_files = self.get_raw_files(self.tgt_lang_dir)
 
-        # Determine state of data in data dir.
-        self.data_already_split = os.path.exists(self.src_train_file)
-
     def split_data(self, shuffle, num_val_examples, num_test_examples, fresh_run):
-        if self.data_already_split and not fresh_run:
+        if os.path.exists(self.src_train_file) and not fresh_run:
             print('Data is already split.')
             return
 
@@ -85,24 +91,41 @@ class PreProcessor():
         with open(self.tgt_val_file, 'w') as f: f.write(''.join(tgt_val_examples))
         with open(self.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
 
-    def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len):
-        # Load (train, val, test) sets.
-        print('Loading split dat from disk.')
-        with open(self.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
-        with open(self.src_val_file, 'r', encoding='utf8') as f: src_val_examples = f.readlines()
-        with open(self.src_test_file, 'r', encoding='utf8') as f: src_test_examples = f.readlines()
-        with open(self.tgt_train_file, 'r', encoding='utf8') as f: tgt_train_examples = f.readlines()
-        with open(self.tgt_val_file, 'r', encoding='utf8') as f: tgt_val_examples = f.readlines()
-        with open(self.tgt_test_file, 'r', encoding='utf8') as f: tgt_test_examples = f.readlines()
+    def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len, fresh_run=False):
+        if os.path.exists(self.src_tokenized_train_file) and not fresh_run:
+            print('Loading tokenized data from disk.')
+            with open(self.src_tokenized_train_file, 'rb') as f: src_train_tokenized = pickle.load(f)
+            with open(self.src_tokenized_val_file, 'rb') as f: src_val_tokenized = pickle.load(f)
+            with open(self.src_tokenized_test_file, 'rb') as f: src_test_tokenized = pickle.load(f)
+            with open(self.tgt_tokenized_train_file, 'rb') as f: tgt_train_tokenized = pickle.load(f)
+            with open(self.tgt_tokenized_val_file, 'rb') as f: tgt_val_tokenized = pickle.load(f)
+            with open(self.tgt_tokenized_test_file, 'rb') as f: tgt_test_tokenized = pickle.load(f)
+        else:
+            # Load (train, val, test) sets.
+            print('Loading split data from disk.')
+            with open(self.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
+            with open(self.src_val_file, 'r', encoding='utf8') as f: src_val_examples = f.readlines()
+            with open(self.src_test_file, 'r', encoding='utf8') as f: src_test_examples = f.readlines()
+            with open(self.tgt_train_file, 'r', encoding='utf8') as f: tgt_train_examples = f.readlines()
+            with open(self.tgt_val_file, 'r', encoding='utf8') as f: tgt_val_examples = f.readlines()
+            with open(self.tgt_test_file, 'r', encoding='utf8') as f: tgt_test_examples = f.readlines()
 
-        # Tokenize data.
-        print('Tokenizing data.')
-        src_train_tokenized = self.tokenize(src_train_examples, src_tokenizer)
-        src_val_tokenized = self.tokenize(src_val_examples, src_tokenizer)
-        src_test_tokenized = self.tokenize(src_test_examples, src_tokenizer)
-        tgt_train_tokenized = self.tokenize(tgt_train_examples, tgt_tokenizer)
-        tgt_val_tokenized = self.tokenize(tgt_val_examples, tgt_tokenizer)
-        tgt_test_tokenized = self.tokenize(tgt_test_examples, tgt_tokenizer)
+            # Tokenize data.
+            print('Tokenizing data.')
+            src_train_tokenized = self.tokenize(src_train_examples, src_tokenizer)
+            src_val_tokenized = self.tokenize(src_val_examples, src_tokenizer)
+            src_test_tokenized = self.tokenize(src_test_examples, src_tokenizer)
+            tgt_train_tokenized = self.tokenize(tgt_train_examples, tgt_tokenizer)
+            tgt_val_tokenized = self.tokenize(tgt_val_examples, tgt_tokenizer)
+            tgt_test_tokenized = self.tokenize(tgt_test_examples, tgt_tokenizer)
+
+            # Save tokenized data to disk.
+            with open(self.src_tokenized_train_file, 'wb') as f: pickle.dump(src_train_tokenized, f)
+            with open(self.src_tokenized_val_file, 'wb') as f: pickle.dump(src_val_tokenized, f)
+            with open(self.src_tokenized_test_file, 'wb') as f: pickle.dump(src_test_tokenized, f)
+            with open(self.tgt_tokenized_train_file, 'wb') as f: pickle.dump(tgt_train_tokenized, f)
+            with open(self.tgt_tokenized_val_file, 'wb') as f: pickle.dump(tgt_val_tokenized, f)
+            with open(self.tgt_tokenized_test_file, 'wb') as f: pickle.dump(tgt_test_tokenized, f)
 
         # Zip src-tgt pairs.
         train_tokenized = list(zip(src_train_tokenized, tgt_train_tokenized))
@@ -137,10 +160,9 @@ class PreProcessor():
             tokenized_list.append(tokenized)
         return tokenized_list
 
-
     def get_raw_files(self, dir):
         files = get_files(dir)
-        for f in ['train.txt', 'val.txt', 'test.txt']:
+        for f in ['train.txt', 'val.txt', 'test.txt', 'train-tokenized.pickle', 'val-tokenized.pickle', 'test-tokenized.pickle']:
             if f in files:
               files.remove(f)
         return sorted([os.path.join(dir, f) for f in files])

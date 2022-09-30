@@ -177,6 +177,7 @@ If you find an error, a mistake, something does not work or you have an idea for
   * The jupyter notebooks contain a lot of duplicated code (move it to src folder)
   * `argparse` should be used in the notebooks with default parameters so that parameters can be parsed without editing the notebook or the python file
 * Document code!
+* Consistent args and kwargs (named and unnamed)
 * Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
 * Unit tests (+ automatic execution via GitHub Actions)
 * Accessibility is important (make notebooks easily executable in google colab!)
