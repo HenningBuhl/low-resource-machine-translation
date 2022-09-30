@@ -6,5 +6,5 @@ sentencepiece
 sacrebleu
 jupyter
 tqdm
-datasets
 argparse
+torchmetrics

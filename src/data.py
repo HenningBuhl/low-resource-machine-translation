@@ -44,8 +44,11 @@ class PreProcessor():
         self.tgt_files = self.get_raw_files(self.tgt_lang_dir)
 
     def split_data(self, shuffle, num_val_examples, num_test_examples, fresh_run):
-        if os.path.exists(self.src_train_file) and not fresh_run:
+        if self.is_data_split() and not fresh_run:
             print('Data is already split.')
+            return
+        elif self.is_data_tokenized() and not fresh_run:
+            print('Data is already split and tokenized.')
             return
 
         # Gather sentences.
@@ -92,7 +95,7 @@ class PreProcessor():
         with open(self.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
 
     def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len, fresh_run=False):
-        if os.path.exists(self.src_tokenized_train_file) and not fresh_run:
+        if self.is_data_tokenized() and not fresh_run:
             # Load tokenized data.
             print('Loading tokenized data from disk.')
             with open(self.src_tokenized_train_file, 'rb') as f: src_train_tokenized = pickle.load(f)
@@ -146,6 +149,12 @@ class PreProcessor():
         test_dataloader = DataLoader(test_tokenized, batch_size=batch_size, shuffle=False, collate_fn=fn)
 
         return train_datalaoder, val_dataloader, test_dataloader
+
+    def is_data_split(self):
+        return os.path.exists(self.src_train_file)
+
+    def is_data_tokenized(self):
+        return os.path.exists(self.src_tokenized_train_file)
 
     def collate_fn(self, batch, max_len):
         src_inputs, tgt_inputs, tgt_output = [], [], []

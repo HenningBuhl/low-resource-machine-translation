@@ -4,7 +4,8 @@ from constants import *
 from layers import *
 from data import pad_or_truncate
 from calc import top_k_top_p_filtering
-from datasets import load_metric
+import torchmetrics
+
 
 import torch
 import heapq
@@ -28,7 +29,10 @@ class Transformer(pl.LightningModule):
                  d_ff=2048,
                  max_len=128,
                  label_smoothing=0.0,
-                 track_score=True,
+                 track_bleu=True,
+                 track_ter=False,
+                 track_tp=False,
+                 track_chrf=False,
                  ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -54,11 +58,25 @@ class Transformer(pl.LightningModule):
         # Metrics.
         self.tracked_metrics = ['loss']
 
-        self.track_score = track_score
-        if self.track_score:
-            self.tracked_metrics.append('score')
-            score_metric = load_metric('sacrebleu')
-            self.score_metric = score_metric
+        self.track_bleu = track_bleu
+        if self.track_bleu:
+            self.tracked_metrics.append('bleu')
+            self.bleu_metric = torchmetrics.SacreBLEUScore(tokenize='char')
+
+        self.track_ter = track_ter
+        if self.track_ter:
+            self.tracked_metrics.append('ter')
+            self.ter_metric = torchmetrics.TranslationEditRate()
+
+        self.track_tp = track_tp
+        if self.track_tp:
+            self.tracked_metrics.append('tp')
+            self.tp_metric = torch.exp
+
+        self.track_chrf = track_chrf
+        if self.track_chrf:
+            self.tracked_metrics.append('chrf')
+            self.chrf_metric = torchmetrics.CHRFScore()
 
         self.init_params()
 
@@ -99,8 +117,7 @@ class Transformer(pl.LightningModule):
     # Train.
     def training_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
-        loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = self.get_metrics('train', loss.item(), score)
+        loss, metrics = self._shared_eval_step(logits, tgt_out, batch_idx, 'train')
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
@@ -114,16 +131,14 @@ class Transformer(pl.LightningModule):
     # Validation.
     def validation_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
-        loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = self.get_metrics('val', loss.item(), score)
+        loss, metrics = self._shared_eval_step(logits, tgt_out, batch_idx, 'val')
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return metrics
 
     # Test.
     def test_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
-        loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = self.get_metrics('test', loss.item(), score)
+        loss, metrics = self._shared_eval_step(logits, tgt_out, batch_idx, 'test')
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return metrics
 
@@ -134,27 +149,39 @@ class Transformer(pl.LightningModule):
         logits = self(src_input, tgt_input, e_mask, d_mask) # (B, L, vocab_size)
         return logits, tgt_output
 
-    def _shared_eval_step(self, logits, tgt_out, batch_idx):
+    def _shared_eval_step(self, logits, tgt_out, batch_idx, context):
         #loss = F.nll_loss(logits.reshape(-1, self.tgt_vocab_size), tgt_out.reshape(-1))  # TODO check if loss below really works, then delete this line.
-        loss = nn.functional.cross_entropy(logits.reshape(-1, self.tgt_vocab_size), tgt_out.reshape(-1), label_smoothing=self.label_smoothing)
+        loss = nn.functional.cross_entropy(
+            logits.reshape(-1, self.tgt_vocab_size),
+            tgt_out.reshape(-1),
+            label_smoothing=self.label_smoothing,
+            ignore_index=pad_id)
+        metrics = {f'{context}_loss': loss.item()}
 
-        if self.track_score:
+        if self.track_bleu or self.track_ter or self.track_chrf:
             predictions = self.tgt_tokenizer.Decode(torch.max(logits, dim=2).indices.tolist())
             references = self.tgt_tokenizer.Decode(tgt_out.tolist())
-            references = [[' ' if r is None or r == '' else r] for r in references]  # Catch inability of sacrebleu metric to process empty string.
-            score = self.score_metric.compute(predictions=predictions, references=references)['score']
-        else:
-            score = None
+            references = [[r] for r in references]
 
-        return loss, score
+        if self.track_bleu:
+            bleu = self.bleu_metric(predictions, references).item()
+            metrics[f'{context}_bleu'] = bleu
 
-    def get_metrics(self, context, loss, score):
-        metrics = {f'{context}_loss': loss}
-        if self.track_score:
-            metrics[f'{context}_score'] = score
-        return metrics
+        if self.track_ter:
+            ter = self.ter_metric(predictions, references).item()
+            metrics[f'{context}_ter'] = ter
 
-    # Util
+        if self.track_tp:
+            tp = self.tp_metric(loss).item()
+            metrics[f'{context}_tp'] = tp
+          
+        if self.track_chrf:
+            chrf = self.chrf_metric(predictions, references).item()
+            metrics[f'{context}_chrf'] = chrf
+
+        return loss, metrics
+
+    # Util.
     def encode(self, src, e_mask): # For inference.
         src = self.src_embedding(src.to(device))
         src = self.positional_encoder(src)

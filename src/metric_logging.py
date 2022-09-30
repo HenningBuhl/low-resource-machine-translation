@@ -9,9 +9,8 @@ import time
 class MetricLogger(LightningLoggerBase):
     '''A class logging metrics during training and testing.'''
 
-    def __init__(self, track_score):
+    def __init__(self):
         super().__init__()
-        self.track_score = track_score
         self.reset()
 
     @property
@@ -29,7 +28,7 @@ class MetricLogger(LightningLoggerBase):
     @rank_zero_only
     def log_metrics(self, metrics, step):
         for k in metrics.keys():
-            if k == 'epoch':  # Skip epoch key.
+            if k == 'epoch':  # Skip epoch key.  TODO is it still there? see TODO below...
                 continue
             if k in self.metrics.keys():
                 self.metrics[k].append(metrics[k])
@@ -41,7 +40,7 @@ class MetricLogger(LightningLoggerBase):
         
         # Remove epoch key (TODO why is it there in the first place? some later it just disappeared...).
         #del self.metrics['epoch']
-
+        
         # Save list associated with each key to txt file.
         for k in self.metrics.keys():
             value_str = '\n'.join(map(str, self.metrics[k]))

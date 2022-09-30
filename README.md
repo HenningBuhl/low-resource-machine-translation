@@ -46,6 +46,18 @@ The notebooks are designed to work in Google Colab (TODO add link). They work by
 
 ## Getting started
 
+You can either run the python files with your arguments
+
+```
+python TrainBaseline.py --src-lang de --tgt-lang nl
+```
+
+or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts.
+
+```
+bash TrainBaseline.sh SrcLang=de TgtLang=nl
+```
+
 Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into experiments/data/{lang}. The prepared data for de-nl and nl-en experiments might look like this (note that there is on folder for monolingial english data as it is optional):
 
 * experiments
@@ -74,18 +86,6 @@ Each experiment is present as a notebook to enable quick prototyping and a more 
 
 ```
 jupyter nbconvert --to python EXPERIMENT.ipynb
-```
-
-You can either run the python files with your arguments
-
-```
-python TrainBaseline.py --src-lang de --tgt-lang nl
-```
-
-or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts.
-
-```
-bash TrainBaseline.sh SrcLang=de TgtLang=nl
 ```
 
 The sh-scripts also support additional arguments (these are in snake_notation):
@@ -133,20 +133,6 @@ The following table shows sources that influenced the development of this reposi
 | [[5]](#5) | bigs parts of the transformer class (and all its layers) + beam search + SentencePiece training |
 | [[6]](#6) | Top-K and top-p filtering function |
 
-## Contributing
-
-This repository is still in an early and immature state. It would be best if a certain quality standard is established first to make the code future proof.
-
-Here is a list of tasks that would help the progress of this repository and research:
-
-* Perform existing (and future) experiments on different source-pivot-target triplets
-* Feedback
-* Feature requests
-* Bug reporting
-* Any task from the [To-Dos](#to-dos)
-
-If you find an error, a mistake, something does not work or you have an idea for a feature or an improvement - do not hesitate to create a GitHub issue on that topic.
-
 ## To-Dos
 
 ### Experiments
@@ -190,9 +176,25 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Speed-up techniques of transformers
 * Multi-GPU training
 
+## Contributing
+
+This repository is still in an early and immature state. It would be best if a certain quality standard is established first to make the code future proof.
+
+Here is a list of tasks that would help the progress of this repository and research:
+
+* Perform existing (and future) experiments on different source-pivot-target triplets
+* Feedback
+* Feature requests
+* Bug reporting
+* Any task from the [To-Dos](#to-dos)
+
+If you find an error, a mistake, something does not work or you have an idea for a feature or an improvement - do not hesitate to create a GitHub issue on that topic.
+
+Contributing is done via PRs. See the [CONTRIBUTING](/CONTRIBUTING) file.
+
 ## License
 
-This project uses an [MIT license](/LICENSE)
+This project uses an MIT [LICENSE](/LICENSE).
 
 ## References
 
