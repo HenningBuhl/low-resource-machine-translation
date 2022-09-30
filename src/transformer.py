@@ -15,6 +15,7 @@ import copy
 
 # TODO split in transformer and Seq2SeqModel? an whole left and whole right side for n:m setting.
 class Transformer(pl.LightningModule):
+    '''A class implementing a transformer used for machine translation.'''
     def __init__(self,
                  src_tokenizer,
                  tgt_tokenizer,

@@ -1,11 +1,14 @@
-import os
 from pytorch_lightning.loggers.base import LightningLoggerBase
 from pytorch_lightning.utilities.distributed import rank_zero_only
 from util import save_dict
+
+import os
 import time
 
 
 class MetricLogger(LightningLoggerBase):
+    '''A class logging metrics during training and testing.'''
+
     def __init__(self, track_score):
         super().__init__()
         self.track_score = track_score
@@ -30,6 +33,8 @@ class MetricLogger(LightningLoggerBase):
                 self.metrics[k].append(metrics[k])
 
     def manual_save(self, dir, file):
+        '''Saves all metrics in a combined json file and as separate txt files for each metric.'''
+        
         end = time.time()
         training_time = end - self.start
         self.metrics['training_time'] = training_time
@@ -37,7 +42,6 @@ class MetricLogger(LightningLoggerBase):
         # Save metrics dict as json.
         save_dict(file, self.metrics)
         
-        # TODO enable/disable depending on arg.
         # Save list associated with each key to txt file.
         for k in self.keys:
             value_str = '\n'.join(map(str, self.metrics[k]))

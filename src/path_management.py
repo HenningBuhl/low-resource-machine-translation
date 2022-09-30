@@ -8,11 +8,16 @@ CONST_TOKENIZERS_DIR = './tokenizers'
 
 
 class ExperimentPathManager():
+    '''
+    A class managing all paths required for an experiment. One experiment consist of training and manging
+    one or more models.
+    '''
+
     def __init__(self, run_name, *models_names, run_dir=None):
         self.run_name = run_name
         self.models_names = models_names
 
-        # Run dir.
+        # Use a new run_dir if none was passed.
         if run_dir is None:
             self.run_dir = os.path.join(CONST_RUNS_DIR, f'{self.run_name}-{get_time_as_string()}')
         else:
@@ -30,7 +35,7 @@ class ExperimentPathManager():
         # Constant directories.
         create_dirs(CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
 
-        # Run dir.
+        # Create run_dir.
         create_dir(self.run_dir)
 
         # Model path managers.
@@ -40,6 +45,7 @@ class ExperimentPathManager():
 
 
 class ModelPathManager():
+    '''A class managing all paths one model requires.'''
     def __init__(self, model_dir):
         self.model_dir = model_dir
 
@@ -60,6 +66,7 @@ class ModelPathManager():
 
 
 class DataPathManager():
+    '''A class managing all paths required for parallel data preparation.'''
     def __init__(self, src_lang, tgt_lang, data_dir):
         self.src_lang = src_lang
         self.tgt_lang = tgt_lang
@@ -93,6 +100,7 @@ class DataPathManager():
         return sorted([os.path.join(dir, f) for f in files])
 
 class TokenizerPathManager():
+    '''A class managing all paths required for setting up a tokenizer'''
     def __init__(self, lang, data_dir, mono_data_dir):
         self.tokenizer_path = os.path.join(CONST_TOKENIZERS_DIR, lang)
         self.tokenizer_sp_path = os.path.join(self.tokenizer_path, lang)
@@ -106,4 +114,5 @@ class TokenizerPathManager():
         self.files = [train_file] + [val_file] + mono_data_files
 
 def get_files(dir):
+    '''Return all files that are present in a given directory.'''
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]

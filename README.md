@@ -151,6 +151,7 @@ If you find an error, a mistake, something does not work or you have an idea for
 * Accessibility is important (make notebooks easily executable in google colab!)
 * Inference methods should work with batch_size > 1
 
+* Setup conventions (import order, documentation, etc...)
 * More model types and variations to compare transformer performance with other models
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers

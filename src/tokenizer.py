@@ -7,6 +7,7 @@ import sentencepiece as spm
 
 
 class TokenizerBuilder():
+    '''A class training or loading a tokenizer.'''
     def __init__(self, lang, data_dir, mono_data_dir):
         self.lang = lang
         self.data_dir = data_dir
@@ -16,12 +17,12 @@ class TokenizerBuilder():
 
     def build(self, vocab_size=16000, character_coverage=1.0, model_type='unigram'):
       if os.path.exists(self.tpm.tokenizer_path):
-          print('Tokenizer exists. Skipping training.')
+          print('Loading tokenizer from disk.')
           tokenizer = spm.SentencePieceProcessor()
           tokenizer.Load(f'{self.tpm.tokenizer_sp_path}.model')
           return tokenizer
       else:
-          print('Training tokenizer...')
+          print('Training tokenizer.')
           os.mkdir(self.tpm.tokenizer_path)
 
           template = "--input={} \

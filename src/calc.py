@@ -3,6 +3,8 @@ from torch.functional import F
 
 
 def top_k_top_p_filtering(logits, top_k=0, top_p=1.0, filter_value=-float('inf')):
+    '''Applies top-K and top-p (nucleus) filtering to the logits.'''
+
     assert logits.dim() == 1  # batch size 1 for now - could be updated for more but the code would be less clear.
     top_k = min(top_k, logits.size(-1))  # Safety check.
     if top_k > 0:

@@ -3,53 +3,36 @@ import os
 from datetime import datetime
 
 
-# Create a directory only if it does not already exists.
 def create_dir(dir):
+    '''Creates a directory if it does not already exists.'''
     if os.path.exists(dir):
         print(f'Dir "{dir}" already exists.')
     else:
         os.mkdir(dir)
         print(f'Dir "{dir}" does not exist, creating it.')
 
-# Create directories.
 def create_dirs(*dirs):
+    '''Creates all directories.'''
     for dir in dirs:
         create_dir(dir)
 
-# Save a python dictionary.
-def save_dict(file, dictionary):
+def save_dict(file, dict):
+    '''Saves a dictionary to a file.'''
     with open(file, 'w') as f:
-        json.dump(dictionary, f, indent=4)
+        json.dump(dict, f, indent=4)
 
-# Read a python dictionary.
-def read_dict(dict_file):
+def load_dict(dict_file):
+    '''Loads a dictionary from a file.'''
     return json.load(open(dict_file))
 
-# TODO REMOVE (argparse is used instead)
-# Dictionary which is capable of dot-notation.
-class dotdict(dict):
-    def __init__(self, *args, **kwargs):
-        super(dotdict, self).__init__(*args, **kwargs)
-        for key, value in self.items():
-            setattr(self, key, value)
-        
-    def __getattr__(self, name):
-        return self[name]
-
-# Iterate over batches.
-def batch(iterable, batch_size=1):
-    l = len(iterable)
-    for ndx in range(0, l, batch_size):
-        yield iterable[ndx:min(ndx + batch_size, l)]
-
-# Get current time as string.
 def get_time_as_string():
+    '''Gets current time as string.'''
     now = datetime.now()
     date_time = now.strftime("%Y.%m.%d-%H.%M.%S")
     return date_time
 
-# Check checkter the current environment is a jupyter notebook.
 def is_notebook():
+    '''Checks whether the current environment is a jupyter notebook.'''
     try:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':

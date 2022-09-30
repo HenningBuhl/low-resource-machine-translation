@@ -8,7 +8,7 @@ import gzip
 class ModelConfig():
     def __init__(self,
                  type, # single, cascaded
-                 langs, # [src, tgt], [src, pvt, tgt]
+                 langs, # [src, tgt] or [src, pvt, tgt]
                  paths, # model_path or paths
                  name=None,
                 ):

@@ -2,23 +2,16 @@ from tqdm import tqdm
 from constants import *
 from path_management import DataPathManager
 from util import *
-from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
 import torch
-import pickle
 import random
-import sentencepiece as spm
-import numpy as np
 import os
-import requests
-import gzip
-import shutil
-import zipfile
-import tarfile
 
 
 class PreProcessor():
+    '''A class handling preprocessing of a parallel data corpus.'''
+
     def __init__(self, src_lang, tgt_lang, data_dir):
         self.src_lang = src_lang
         self.tgt_lang = tgt_lang
@@ -35,31 +28,37 @@ class PreProcessor():
             return
 
         # Gather sentences.
+        print('Gathering data from src files.')
         src_sentences = []
         for src_file in self.dpm.src_files:
             with open(src_file, 'r', encoding='utf8') as f:
                 src_sentences.extend(f.readlines())
 
+        print('Gathering data from tgt files.')
         tgt_sentences = []
         for tgt_file in self.dpm.tgt_files:
             with open(tgt_file, 'r', encoding='utf8') as f:
                 tgt_sentences.extend(f.readlines())
 
+        # Zip data into list of sentence pairs.
         pairs = list(zip(src_sentences, tgt_sentences))
 
         # Shuffle data.
         if shuffle:
+            print('Shuffling data.')
             random.shuffle(pairs)
         
         # Split data.
         num_examples = len(src_sentences)
         num_train_examples = num_examples - num_val_examples - num_test_examples
 
+        print(f'Splitting data into ({num_train_examples}, {num_val_examples}, {num_test_examples}) (train, val, test).')
         train_examples = pairs[0:num_train_examples]
         val_examples = pairs[num_train_examples:num_train_examples+num_val_examples]
         test_examples = pairs[num_train_examples+num_val_examples:]
 
         # Save split data to disk.
+        print('Saving split data to disk.')
         src_train_examples, tgt_train_examples = zip(*train_examples)
         src_val_examples, tgt_val_examples = zip(*val_examples)
         src_test_examples, tgt_test_examples = zip(*test_examples)
@@ -73,6 +72,7 @@ class PreProcessor():
 
     def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples):
         # Load (train, val, test) sets.
+        print('Loading split dat from disk.')
         with open(self.dpm.src_train_file, 'r', encoding='utf8') as f: src_train_examples = f.readlines()
         with open(self.dpm.src_val_file, 'r', encoding='utf8') as f: src_val_examples = f.readlines()
         with open(self.dpm.src_test_file, 'r', encoding='utf8') as f: src_test_examples = f.readlines()
@@ -81,6 +81,7 @@ class PreProcessor():
         with open(self.dpm.tgt_test_file, 'r', encoding='utf8') as f: tgt_test_examples = f.readlines()
 
         # Tokenize data.
+        print('Tokenizing data.')
         src_train_tokenized = self.tokenize(src_train_examples, src_tokenizer)
         src_val_tokenized = self.tokenize(src_val_examples, src_tokenizer)
         src_test_tokenized = self.tokenize(src_test_examples, src_tokenizer)
@@ -95,6 +96,7 @@ class PreProcessor():
 
         # Limit to max examples.
         if max_examples != -1:
+            print(f'Limiting training data to {max_examples}')
             train_tokenized = train_tokenized[:max_examples]
 
         # Create data loaders.
@@ -128,97 +130,3 @@ def pad_or_truncate( tokens):
     else:
         tokens = tokens[:max_len]
     return tokens
-
-
-
-def download_data(src_lang, tgt_lang):
-    src_tgt_key = get_src_tgt_key(src_lang, tgt_lang)
-
-    # Download data.
-    data_zip_file = os.path.join('data', f'{src_tgt_key}.zip')
-    download_file(wiki_matrix_data_urls[src_tgt_key], data_zip_file)
-
-    # Unpack data.
-    data_unzip_dir = os.path.join('data', src_tgt_key)
-    unzip_zip(data_zip_file, data_unzip_dir)
-
-def load_data(src_lang, tgt_lang, src_tokenizer, tgt_tokenizer, max_examples=-1):
-    src_tgt_key = get_src_tgt_key(src_lang, tgt_lang)
-    preprocessed_data_file = os.path.join('data', src_tgt_key, 'preprocessed.pt')
-    
-    if os.path.exists(preprocessed_data_file):
-        print('Preprocessed data exists, loading from disk...')
-        dataset = torch.load(preprocessed_data_file)
-    else:
-        dataset_name = 'WikiMatrix'
-        src_file = os.path.join('data', src_tgt_key, f'{dataset_name}.{src_tgt_key}.{src_lang}')
-        tgt_file = os.path.join('data', src_tgt_key, f'{dataset_name}.{src_tgt_key}.{tgt_lang}')
-
-        print("Tokenizing & Padding source data...")
-        with open(src_file, 'r', encoding='utf8') as f:
-            src_text_list = f.readlines()
-        src_inputs = process_src(src_text_list, src_tokenizer) # (sample_num, L)
-
-        print("Tokenizing & Padding target data...")
-        with open(tgt_file, 'r', encoding='utf8') as f:
-            tgt_text_list = f.readlines()
-        target_inputs, target_output = process_tgt(tgt_text_list, tgt_tokenizer) # (sample_num, L)
-
-        print('Saving data to disk...')
-        dataset = TensorDataset(torch.LongTensor(src_inputs), torch.LongTensor(target_inputs), torch.LongTensor(target_output))
-        torch.save(dataset, preprocessed_data_file)    
-
-    train_dataset, val_dataset, test_dataset = split_dataset(dataset, src_tgt_key, max_examples=max_examples)
-    return train_dataset, val_dataset, test_dataset
-
-
-
-def download_file(url, file_name):
-    if os.path.exists(file_name):
-        print(f'File "{file_name}" already exists. Skipping download.')
-        return
-
-    print(f'Downloading from {url}...')
-    response = requests.get(url)
-    open(file_name, "wb").write(response.content)
-    print(f'Saved file to {file_name}.')
-
-def unzip_gz(gz_file, unzip_file):
-    if os.path.exists(unzip_file):
-        print(f'File {unzip_file} already exists. Skipping unzipping.')
-        return
-
-    print(f'Unzipping {gz_file} to {unzip_file}...')
-    with gzip.open(gz_file, 'rb') as f_in:
-        with open(unzip_file, 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-    
-    print(f'Unzipped {gz_file} to {unzip_file}.')
-
-def unzip_zip(zip_file, unzip_dir):
-    if os.path.exists(unzip_dir):
-        print(f'Directory {unzip_dir} already exists. Skipping unzipping.')
-        return
-    print(f'Unzipping {zip_file} to {unzip_dir}...')
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        zip_ref.extractall(unzip_dir)
-    print(f'Unzipped {zip_file} to {unzip_dir}.')
-
-def unzip_tar(zip_file, unzip_dir):
-    if os.path.exists(unzip_dir):
-        print(f'Directory {unzip_dir} already exists. Skipping unzipping.')
-        return
-    print(f'Unzipping {zip_file} to {unzip_dir}...')
-    with tarfile.open(zip_file, 'r') as zip_ref:
-        zip_ref.extractall(unzip_dir)
-    print(f'Unzipped {zip_file} to {unzip_dir}.')
-
-def unzip_targz(zip_file, unzip_dir):
-    if os.path.exists(unzip_dir):
-        print(f'Directory {unzip_dir} already exists. Skipping unzipping.')
-        return
-    print(f'Unzipping {zip_file} to {unzip_dir}...')
-    tar = tarfile.open(zip_file, "r:gz")
-    tar.extractall(unzip_dir)
-    tar.close()
-    print(f'Unzipped {zip_file} to {unzip_dir}.')
