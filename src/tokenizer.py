@@ -8,7 +8,7 @@ import sentencepiece as spm
 
 class TokenizerBuilder():
     '''A class training or loading a tokenizer.'''
-    def __init__(self, lang, other_lang):
+    def __init__(self, lang, other_lang):  # TODO if other_lang is None, not a baseline training and tokenizer MUST already exist.
         # Parallel corpus data dir.
         data_dir = get_parallel_data_dir(lang, other_lang)
 
