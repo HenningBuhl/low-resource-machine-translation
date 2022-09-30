@@ -32,6 +32,8 @@ class ExperimentPathManager():
             setattr(self, models_name, mpm)
 
     def init(self):
+        '''Creates all required directories.'''
+
         # Constant directories.
         create_dirs(CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
 
@@ -60,6 +62,8 @@ class ModelPathManager():
         self.metrics_svg_template = os.path.join(self.metrics_dir, '{}.svg')
 
     def init(self):
+        '''Creates all required directories.'''
+
         create_dir(self.model_dir)
         create_dir(self.checkpoint_dir)
         create_dir(self.metrics_dir)

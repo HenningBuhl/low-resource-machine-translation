@@ -93,7 +93,7 @@ class Transformer(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
         loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = {'train_loss': loss.item(), 'train_score': score}
+        metrics = self.get_metrics('train', loss.item(), score)
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return loss
 
@@ -108,7 +108,7 @@ class Transformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
         loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = {'val_loss': loss.item(), 'val_score': score}
+        metrics = self.get_metrics('val', loss.item(), score)
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return metrics
 
@@ -116,7 +116,7 @@ class Transformer(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         logits, tgt_out = self._shared_forward_step(batch, batch_idx)
         loss, score = self._shared_eval_step(logits, tgt_out, batch_idx)
-        metrics = {'test_loss': loss.item(), 'test_score': score}
+        metrics = self.get_metrics('test', loss.item(), score)
         self.log_dict(metrics, on_step=True, on_epoch=True, prog_bar=True)
         return metrics
 
@@ -135,12 +135,18 @@ class Transformer(pl.LightningModule):
         if self.track_score:
             predictions = self.tgt_tokenizer.Decode(torch.max(logits, dim=2).indices.tolist())
             references = self.tgt_tokenizer.Decode(tgt_out.tolist())
-            references = [[' ' if r is None or r == '' else r] for r in references] # Catch inability of sacrebleu metric to process empty string.
+            references = [[' ' if r is None or r == '' else r] for r in references]  # Catch inability of sacrebleu metric to process empty string.
             score = self.score_metric.compute(predictions=predictions, references=references)['score']
         else:
-            score = -1
+            score = None
 
         return loss, score
+
+    def get_metrics(self, context, loss, score):
+        metrics = {f'{context}_loss': loss}
+        if self.track_score:
+            metrics[f'{context}_score'] = score
+        return metrics
 
     # Util
     def encode(self, src, e_mask): # For inference.
