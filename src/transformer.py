@@ -48,8 +48,11 @@ class Transformer(pl.LightningModule):
         self.softmax = nn.LogSoftmax(dim=-1)
 
         # Metrics.
+        self.tracked_metrics = ['loss']
+
         self.track_score = track_score
         if self.track_score:
+            self.tracked_metrics.append('score')
             score_metric = load_metric('sacrebleu')
             self.score_metric = score_metric
 

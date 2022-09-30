@@ -29,43 +29,33 @@ class MetricLogger(LightningLoggerBase):
     @rank_zero_only
     def log_metrics(self, metrics, step):
         for k in metrics.keys():
-            if k in self.keys:
+            if k == 'epoch':  # Skip epoch key.
+                continue
+            if k in self.metrics.keys():
                 self.metrics[k].append(metrics[k])
+            else:
+                self.metrics[k] = [metrics[k]]
 
     def manual_save(self, dir, file):
         '''Saves all metrics in a combined json file and as separate txt files for each metric.'''
         
+        # Remove epoch key (TODO why is it there in the first place?).
+        del self.metrics['epoch']
+
+        # Save list associated with each key to txt file.
+        for k in self.metrics.keys():
+            value_str = '\n'.join(map(str, self.metrics[k]))
+            with open(os.path.join(dir, f'{k}.txt'), 'w') as f:
+                f.write(value_str)
+        
+        # Measuring training time.
         end = time.time()
         training_time = end - self.start
         self.metrics['training_time'] = training_time
 
         # Save metrics dict as json.
         save_dict(file, self.metrics)
-        
-        # Save list associated with each key to txt file.
-        for k in self.keys:
-            value_str = '\n'.join(map(str, self.metrics[k]))
-            with open(os.path.join(dir, f'{k}.txt'), 'w') as f:
-                f.write(value_str)
 
     def reset(self):
-        self.hparams = None
-        self.keys = [
-            'train_loss_step',
-            'train_loss_epoch',
-            'val_loss_step',
-            'val_loss_epoch',
-            'test_loss_step',
-            'test_loss_epoch',
-        ]
-        if self.track_score:
-            self.keys.extend([
-                'train_score_step',
-                'train_score_epoch',
-                'val_score_step',
-                'val_score_epoch',
-                'test_score_step',
-                'test_score_epoch',
-            ])
-        self.metrics = {k:[] for k in self.keys}
+        self.metrics = {}
         self.start = time.time()
