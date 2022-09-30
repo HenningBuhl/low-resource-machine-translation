@@ -13,7 +13,7 @@ import pytorch_lightning as pl
 import copy
 
 
-# TODO split in transformer and Seq2SeqModel?
+# TODO split in transformer and Seq2SeqModel? an whole left and whole right side for n:m setting.
 class Transformer(pl.LightningModule):
     def __init__(self,
                  src_tokenizer,
@@ -288,6 +288,13 @@ class Transformer(pl.LightningModule):
             decoded_output = last_words[1:].tolist()
         
         return self.tgt_tokenizer.decode_ids(decoded_output)
+    
+    # Save and Load.
+    def save(self, path):
+        torch.save(self.state_dict(), path)
+    
+    def load(self, path):
+        self.load_state_dict(torch.load(path))
 
 
 class Encoder(nn.Module):

@@ -17,10 +17,9 @@ def create_dirs(*dirs):
         create_dir(dir)
 
 # Save a python dictionary.
-def save_dict(dir, dictionary, name):
-    f = open(os.path.join(dir, f'{name}.json'), 'w')
-    json.dump(dictionary, f)
-    f.close()
+def save_dict(file, dictionary):
+    with open(file, 'w') as f:
+        json.dump(dictionary, f, indent=4)
 
 # Read a python dictionary.
 def read_dict(dict_file):

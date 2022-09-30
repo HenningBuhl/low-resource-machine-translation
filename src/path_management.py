@@ -23,7 +23,7 @@ class ExperimentPathManager():
 
         # Model path managers.
         for models_name in self.models_names:
-            mpm = ModelPathManager(self.run_dir, models_name)
+            mpm = ModelPathManager(os.path.join(self.run_dir, models_name))
             setattr(self, models_name, mpm)
 
     def init(self):
@@ -40,18 +40,18 @@ class ExperimentPathManager():
 
 
 class ModelPathManager():
-    def __init__(self, run_dir, model_name):
-        self.run_dir = run_dir
-        self.model_name = model_name
+    def __init__(self, model_dir):
+        self.model_dir = model_dir
 
         # Directories.
-        self.model_dir = os.path.join(self.run_dir, model_name)
-        self.checkpoint_dir = os.path.join(run_dir, 'checkpoints')
-        self.metrics_dir = os.path.join(run_dir, 'metrics')
+        self.checkpoint_dir = os.path.join(self.model_dir, 'checkpoints')
+        self.metrics_dir = os.path.join(self.model_dir, 'metrics')
 
         # Files.
-        self.untrained_model_file = os.path.join(run_dir, 'untrained_model.pt')
-        self.final_model_file = os.path.join(run_dir, 'final_model.pt')
+        self.untrained_model_file = os.path.join(self.model_dir, 'untrained_model.pt')
+        self.model_file = os.path.join(self.model_dir, 'final_model.pt')
+        self.metrics_file = os.path.join(self.metrics_dir, 'metrics.json')
+        self.metrics_svg_template = os.path.join(self.metrics_dir, '{}.svg')
 
     def init(self):
         create_dir(self.model_dir)

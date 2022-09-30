@@ -4,9 +4,6 @@ experiments/runs/
 experiments/tokenizers/
 experiments/models/
 
-# Results.
-qol/results/
-
 # qsub files.
 experiments/*.o*
 experiments/*.e*
@@ -17,7 +14,6 @@ experiments/.ipynb_checkpoints/
 
 # Python cache.
 src/__pycache__/
-qol/__pycache__/
 
 
 

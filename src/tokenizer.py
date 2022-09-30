@@ -1,6 +1,5 @@
 from constants import *
 from tqdm import tqdm
-from data import get_src_tgt_key
 from path_management import TokenizerPathManager
 
 import os

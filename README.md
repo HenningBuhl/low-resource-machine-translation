@@ -138,42 +138,23 @@ If you find an error, a mistake, something does not work or you have an idea for
 
 ### Misc
 
-+ Document code!
-* Create a central hub for models and tokenizers that were produced with this repo (export format of parameters etc. should be made future proof first)
-* Datasets should be easily switchable (download+unzip or use local files) [WikiMatrix is currently hard coded]
-* Tokenizers should be trainable with any number of files
-* Unit tests (+ automatic execution via GitHub Actions)
-* Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
-* Option to not save all preprocessed data to disk
-* Option to turn use `collate_fn` instead of loading all data into memory
-* Better class, method and argument documentation
-* More model types and variations to compare transformer performance with other models
-* Add more metrics (e.g. ter, translation perplexity)
-* Non-autoregressive Transformer (NAT)
-* Attention variations of transformers
-* Speed-up techniques of transformers
-* Training options
-  * Soft labels
-  * Optimizer and its params
-  * Scheduling
-  * Dropout rate, etc.
-  * Early stopping (saving and using best model after ending training due to metric not improving for n epochs)
-* Different types of tokenizers
-  * Subword-based (bpe, unigram, word-piece)
-  * Word-based
-  * Character-based
-
-### Quality of Life
-
 * Make code more flexible to different users' environments
   * .sh-scripts should include option to skip `conda activate` call
   * .sh-scripts should include option to activate a conda environment that was parsed to them in the console
   * .sh-scripts should include option to skip the jupyter conversion (currently a separate .sh-script exists for that purpose)
 * Code needs to be revamped to enable easy parametrized execution
-  * The jupyter notebooks contain a lot of duplicated code
+  * The jupyter notebooks contain a lot of duplicated code (move it to src folder)
   * `argparse` should be used in the notebooks with default parameters so that parameters can be parsed without editing the notebook or the python file
-* All settings, parameters and results should be exported in a future proof, clean and unified format
+* Document code!
+* Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
+* Unit tests (+ automatic execution via GitHub Actions)
+* Accessibility is important (make notebooks easily executable in google colab!)
 * Inference methods should work with batch_size > 1
+
+* More model types and variations to compare transformer performance with other models
+* Non-autoregressive Transformer (NAT)
+* Attention variations of transformers
+* Speed-up techniques of transformers
 * Multi-GPU training
 
 ## License

@@ -29,8 +29,8 @@ class PreProcessor():
         # Determine state of data in data dir.
         self.data_already_split = os.path.exists(self.dpm.src_train_file)
 
-    def split_data(self, shuffle, val_test_examples):
-        if self.data_already_split:
+    def split_data(self, shuffle, num_val_examples, num_test_examples, fresh_run):
+        if self.data_already_split and not fresh_run:
             print('Data is already split.')
             return
 
@@ -53,7 +53,6 @@ class PreProcessor():
         
         # Split data.
         num_examples = len(src_sentences)
-        num_val_examples, num_test_examples = val_test_examples
         num_train_examples = num_examples - num_val_examples - num_test_examples
 
         train_examples = pairs[0:num_train_examples]
@@ -108,19 +107,10 @@ class PreProcessor():
     def collate_fn(self, batch):
         src_inputs, tgt_inputs, tgt_output = [], [], []
         for src, tgt in batch:
-            src_inputs.append(self.pad_or_truncate(src + [eos_id]))
-            tgt_inputs.append(self.pad_or_truncate([sos_id] + tgt))
-            tgt_output.append(self.pad_or_truncate(tgt + [eos_id]))
+            src_inputs.append(pad_or_truncate(src + [eos_id]))
+            tgt_inputs.append(pad_or_truncate([sos_id] + tgt))
+            tgt_output.append(pad_or_truncate(tgt + [eos_id]))
         return torch.LongTensor(src_inputs), torch.LongTensor(tgt_inputs), torch.LongTensor(tgt_output)
-
-    def pad_or_truncate(self, tokens):
-        if len(tokens) < max_len:
-            left = max_len - len(tokens)
-            padding = [pad_id] * left
-            tokens += padding
-        else:
-            tokens = tokens[:max_len]
-        return tokens
 
     def tokenize(self, text_list, tokenizer):
         tokenized_list = []
@@ -128,6 +118,16 @@ class PreProcessor():
             tokenized = tokenizer.EncodeAsIds(text.strip())
             tokenized_list.append(tokenized)
         return tokenized_list
+
+
+def pad_or_truncate( tokens):
+    if len(tokens) < max_len:
+        left = max_len - len(tokens)
+        padding = [pad_id] * left
+        tokens += padding
+    else:
+        tokens = tokens[:max_len]
+    return tokens
 
 
 
@@ -170,6 +170,8 @@ def load_data(src_lang, tgt_lang, src_tokenizer, tgt_tokenizer, max_examples=-1)
 
     train_dataset, val_dataset, test_dataset = split_dataset(dataset, src_tgt_key, max_examples=max_examples)
     return train_dataset, val_dataset, test_dataset
+
+
 
 def download_file(url, file_name):
     if os.path.exists(file_name):
@@ -220,57 +222,3 @@ def unzip_targz(zip_file, unzip_dir):
     tar.extractall(unzip_dir)
     tar.close()
     print(f'Unzipped {zip_file} to {unzip_dir}.')
-
-def get_src_tgt_key(src_lang, tgt_lang):
-    pseudo_key = f'{src_lang}-{tgt_lang}'
-    if not pseudo_key in wiki_matrix_data_urls.keys():
-        pseudo_key = f'{tgt_lang}-{src_lang}'
-    return pseudo_key
-
-wiki_matrix_data_urls = {
-    'de-en': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-en.txt.zip',
-    'de-nl': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-nl.txt.zip',
-    'en-nl': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/en-nl.txt.zip',
-    'de-sv': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/de-sv.txt.zip',
-    'en-sv': 'https://opus.nlpl.eu/download.php?f=WikiMatrix/v1/moses/en-sv.txt.zip',
-}
-
-def process_src(text_list, src_tokenizer):
-    tokenized_list = []
-    for text in tqdm(text_list):
-        tokenized = src_tokenizer.EncodeAsIds(text.strip())
-        tokenized_list.append(pad_or_truncate(tokenized + [eos_id]))
-    return tokenized_list
-
-def process_tgt(text_list, tgt_tokenizer):
-    input_tokenized_list = []
-    output_tokenized_list = []
-    for text in tqdm(text_list):
-        tokenized = tgt_tokenizer.EncodeAsIds(text.strip())
-        tgt_input = [sos_id] + tokenized
-        tgt_output = tokenized + [eos_id]
-        input_tokenized_list.append(pad_or_truncate(tgt_input))
-        output_tokenized_list.append(pad_or_truncate(tgt_output))
-    return input_tokenized_list, output_tokenized_list
-
-def pad_or_truncate(tokens):
-    if len(tokens) < max_len:
-        left = max_len - len(tokens)
-        padding = [pad_id] * left
-        tokens += padding
-    else:
-        tokens = tokens[:max_len]
-    return tokens
-
-def split_dataset(dataset, src_tgt_key, val_ratio=0.05, test_ratio=0.05, max_examples=-1):
-    print(f'Splitting {src_tgt_key} data...')
-    max_examples = len(dataset) if max_examples == -1 else max_examples      
-    train_size = np.minimum(int((1 - val_ratio - test_ratio) * len(dataset)), max_examples)
-    val_size = int(val_ratio * len(dataset))
-    test_size = int(test_ratio * len(dataset))
-    residue_size = len(dataset) - train_size - val_size - test_size
-    train_dataset, val_dataset, test_dataset, _ = torch.utils.data.random_split(
-        dataset, [train_size, val_size, test_size, residue_size])
-
-    print(f'Data ({src_tgt_key}) split.')
-    return train_dataset, val_dataset, test_dataset
