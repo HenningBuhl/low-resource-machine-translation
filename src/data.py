@@ -93,6 +93,7 @@ class PreProcessor():
 
     def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len, fresh_run=False):
         if os.path.exists(self.src_tokenized_train_file) and not fresh_run:
+            # Load tokenized data.
             print('Loading tokenized data from disk.')
             with open(self.src_tokenized_train_file, 'rb') as f: src_train_tokenized = pickle.load(f)
             with open(self.src_tokenized_val_file, 'rb') as f: src_val_tokenized = pickle.load(f)
@@ -120,6 +121,7 @@ class PreProcessor():
             tgt_test_tokenized = self.tokenize(tgt_test_examples, tgt_tokenizer)
 
             # Save tokenized data to disk.
+            print('Saving tokenized data to disk.')
             with open(self.src_tokenized_train_file, 'wb') as f: pickle.dump(src_train_tokenized, f)
             with open(self.src_tokenized_val_file, 'wb') as f: pickle.dump(src_val_tokenized, f)
             with open(self.src_tokenized_test_file, 'wb') as f: pickle.dump(src_test_tokenized, f)
