@@ -27,6 +27,7 @@ class Transformer(pl.LightningModule):
                  num_heads=8,
                  d_ff=2048,
                  max_len=128,
+                 label_smoothing=0.0,
                  track_score=True,
                  ):
         super().__init__()
@@ -35,6 +36,7 @@ class Transformer(pl.LightningModule):
         
         d_k = d_model // num_heads
         self.max_len = max_len
+        self.label_smoothing = label_smoothing
 
         self.src_tokenizer = src_tokenizer
         self.tgt_tokenizer = tgt_tokenizer
@@ -133,9 +135,8 @@ class Transformer(pl.LightningModule):
         return logits, tgt_output
 
     def _shared_eval_step(self, logits, tgt_out, batch_idx):
-        loss = F.nll_loss(
-            logits.reshape(-1, self.tgt_vocab_size),
-            tgt_out.reshape(-1))
+        #loss = F.nll_loss(logits.reshape(-1, self.tgt_vocab_size), tgt_out.reshape(-1))  # TODO check if loss below really works, then delete this line.
+        loss = nn.functional.cross_entropy(logits.reshape(-1, self.tgt_vocab_size), tgt_out.reshape(-1), label_smoothing=self.label_smoothing)
 
         if self.track_score:
             predictions = self.tgt_tokenizer.Decode(torch.max(logits, dim=2).indices.tolist())
