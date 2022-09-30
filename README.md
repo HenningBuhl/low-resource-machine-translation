@@ -71,17 +71,19 @@ You can either run the python files with your arguments
 python TrainBaseline.py --src-lang de --tgt-lang nl
 ```
 
-or use the sh.scripts. The arguments become pascal-case for the sh-scripts.
+or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts.
 
 ```
 bash TrainBaseline.sh SrcLang=de TgtLang=nl
 ```
 
-The sh-scripts also support additional arguments:
+The sh-scripts also support additional arguments (these are in snake_notation):
 
 * SKIP_CONVERT: Skips the conversion of the notebook to a python file. This allows the python file to be manually edited and used without it being overwritten.
 * CONDA_PATH: The path of conda (uses miniconda default path if unspecified)
 * CONDA_ENV: The name of the conda env to use
+
+TODO is the order of experiments important? Only make it possible to train a tokenizer in Trainbaseline?
 
 ## Results
 
