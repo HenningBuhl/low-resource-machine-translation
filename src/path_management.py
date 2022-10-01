@@ -58,7 +58,7 @@ class ModelPathManager():
         self.untrained_model_file = os.path.join(self.model_dir, 'untrained_model.pt')
         self.model_file = os.path.join(self.model_dir, 'final_model.pt')
         self.metrics_file = os.path.join(self.metrics_dir, 'metrics.json')
-        self.metrics_svg_template = os.path.join(self.metrics_dir, '{}.svg')
+        self.metric_svg_template = os.path.join(self.metrics_dir, '{}.svg')
 
     def init(self):
         '''Creates all required directories.'''

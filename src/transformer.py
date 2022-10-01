@@ -4,8 +4,7 @@ from torch.functional import F
 from constants import *
 from layers import *
 from data import pad_or_truncate
-from calc import top_k_top_p_filtering
-from schedulers import NoamOpt, WarumUpInverseSquareRootScheduler
+from schedulers import WarumUpInverseSquareRootScheduler
 
 import torchmetrics
 import torch
@@ -89,39 +88,6 @@ class Transformer(pl.LightningModule):
             self.chrf_metric = torchmetrics.CHRFScore()
 
         self.init_params()
-
-    def init_params(self):
-        for p in self.parameters():
-            if p.dim() > 1:
-                nn.init.xavier_uniform_(p)
-
-    def set_dropout(self, dropout, skip_encoder=False, skip_decoder=False):
-        if not skip_encoder:
-            for encoder_layer in self.encoder.layers:
-                encoder_layer.multihead_attention.dropout.p = dropout
-                encoder_layer.dropout_1.p = dropout
-                encoder_layer.feed_forward.dropout.p = dropout
-                encoder_layer.dropout_2.p = dropout
-
-        if not skip_decoder:
-            for decoder_layer in self.decoder.layers:
-                decoder_layer.masked_multihead_attention.dropout.p = dropout
-                decoder_layer.dropout_1.p = dropout
-                decoder_layer.multihead_attention.dropout.p = dropout
-                decoder_layer.dropout_2.p = dropout
-                decoder_layer.feed_forward.dropout.p = dropout
-                decoder_layer.dropout_3.p = dropout
-    
-    def receive_encoder(self, encoder_model):
-        '''Sets the encoder of this model to the encoder of the given model.'''
-        self.src_embedding = encoder_model.src_embedding
-        self.encoder = encoder_model.encoder
-
-    def receive_decoder(self, decoder_model):
-        '''Sets the decoder of this model to the decoder of the given model.'''
-        self.tgt_embedding = decoder_model.tgt_embedding
-        self.decoder = decoder_model.encoder
-        self.output_linear = decoder_model.output_linear
 
     def forward(self, src_input, tgt_input, e_mask=None, d_mask=None):
         src_input = self.src_embedding(src_input) # (B, L) => (B, L, d_model)
@@ -235,6 +201,39 @@ class Transformer(pl.LightningModule):
         ) # (1, L, tgt_vocab_size)
 
         return output
+
+    def init_params(self):
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+
+    def set_dropout(self, dropout, skip_encoder=False, skip_decoder=False):
+        if not skip_encoder:
+            for encoder_layer in self.encoder.layers:
+                encoder_layer.multihead_attention.dropout.p = dropout
+                encoder_layer.dropout_1.p = dropout
+                encoder_layer.feed_forward.dropout.p = dropout
+                encoder_layer.dropout_2.p = dropout
+
+        if not skip_decoder:
+            for decoder_layer in self.decoder.layers:
+                decoder_layer.masked_multihead_attention.dropout.p = dropout
+                decoder_layer.dropout_1.p = dropout
+                decoder_layer.multihead_attention.dropout.p = dropout
+                decoder_layer.dropout_2.p = dropout
+                decoder_layer.feed_forward.dropout.p = dropout
+                decoder_layer.dropout_3.p = dropout
+    
+    def receive_encoder(self, encoder_model):
+        '''Sets the encoder of this model to the encoder of the given model.'''
+        self.src_embedding = encoder_model.src_embedding
+        self.encoder = encoder_model.encoder
+
+    def receive_decoder(self, decoder_model):
+        '''Sets the decoder of this model to the decoder of the given model.'''
+        self.tgt_embedding = decoder_model.tgt_embedding
+        self.decoder = decoder_model.encoder
+        self.output_linear = decoder_model.output_linear
 
     def make_mask(self, src_input, tgt_input):
         e_mask = (src_input != pad_id).unsqueeze(1)  # (B, 1, L)
@@ -441,3 +440,55 @@ class PriorityQueue():
     def print_objs(self):
         objs = [t[1] for t in self.queue]
         print(objs)
+
+
+def top_k_top_p_filtering(logits, top_k=0, top_p=1.0, filter_value=-float('inf')):
+    '''Applies top-K and top-p (nucleus) filtering to the logits.'''
+
+    assert logits.dim() == 1  # batch size 1 for now - could be updated for more but the code would be less clear.
+    top_k = min(top_k, logits.size(-1))  # Safety check.
+    if top_k > 0:
+        # Remove all tokens with a probability less than the last token of the top-k.
+        indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
+        logits[indices_to_remove] = filter_value
+
+    if top_p < 1.0:
+        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
+        cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+
+        # Remove tokens with cumulative probability above the threshold.
+        sorted_indices_to_remove = cumulative_probs > top_p
+
+        # Shift the indices to the right to keep also the first token above the threshold.
+        sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+        sorted_indices_to_remove[..., 0] = 0
+
+        indices_to_remove = sorted_indices[sorted_indices_to_remove]
+        logits[indices_to_remove] = filter_value
+    return logits
+
+
+def cascaded_inference(batch,
+                       src_tokenizer, tgt_tokenizer,
+                       src_pvt_model, pvt_tgt_model,
+                       score_metric,
+                       method = 'greedy',
+                       **kwargs):
+    '''Performs cascaded inferend with two models.'''
+
+    src_input, tgt_input, tgt_output = batch
+
+    # Convert preprocessed input back to text.
+    src_text = src_tokenizer.Decode(src_input.tolist())[0]
+    label_text = tgt_tokenizer.Decode(tgt_input.tolist())[0]
+    
+    # Pass through src-pvt model.
+    pvt_text = src_pvt_model.translate(src_text, method=method, kwargs=kwargs)
+    
+    # Pass through pvt-tgt model.
+    tgt_text = pvt_tgt_model.translate(pvt_text, method=method, kwargs=kwargs)
+    
+    # Calculate metrics.
+    score = score_metric.compute(predictions=[tgt_text], references=[[label_text]])['score']
+
+    return score, src_text, pvt_text, tgt_text, label_text
