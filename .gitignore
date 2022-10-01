@@ -1,8 +1,9 @@
 # Experiment folders.
+experiments/benchmarks/
 experiments/data/
+experiments/models/
 experiments/runs/
 experiments/tokenizers/
-experiments/models/
 
 # qsub files.
 experiments/*.o*
