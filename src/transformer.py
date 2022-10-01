@@ -29,7 +29,7 @@ class Transformer(pl.LightningModule):
                  warm_up_steps=4000,
                  num_layers=6,
                  d_model=512,
-                 dropout_rate=0.1,
+                 dropout=0.1,
                  num_heads=8,
                  d_ff=2048,
                  max_len=128,
@@ -60,8 +60,8 @@ class Transformer(pl.LightningModule):
         self.src_embedding = nn.Embedding(self.src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_size, d_model)
         self.positional_encoder = PositionalEncoder(d_model, max_len)
-        self.encoder = Encoder(num_layers, d_model, dropout_rate, num_heads, d_k, d_ff)
-        self.decoder = Decoder(num_layers, d_model, dropout_rate, num_heads, d_k, d_ff)
+        self.encoder = Encoder(num_layers, d_model, dropout, num_heads, d_k, d_ff)
+        self.decoder = Decoder(num_layers, d_model, dropout, num_heads, d_k, d_ff)
         self.output_linear = nn.Linear(d_model, self.tgt_vocab_size)
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -95,23 +95,34 @@ class Transformer(pl.LightningModule):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-    def set_dropout_rate(self, dropout_rate, skip_encoder=False, skip_decoder=False):
+    def set_dropout(self, dropout, skip_encoder=False, skip_decoder=False):
         if not skip_encoder:
             for encoder_layer in self.encoder.layers:
-                encoder_layer.multihead_attention.dropout.p = dropout_rate
-                encoder_layer.dropout_1.p = dropout_rate
-                encoder_layer.feed_forward.dropout.p = dropout_rate
-                encoder_layer.dropout_2.p = dropout_rate
+                encoder_layer.multihead_attention.dropout.p = dropout
+                encoder_layer.dropout_1.p = dropout
+                encoder_layer.feed_forward.dropout.p = dropout
+                encoder_layer.dropout_2.p = dropout
 
         if not skip_decoder:
             for decoder_layer in self.decoder.layers:
-                decoder_layer.masked_multihead_attention.dropout.p = dropout_rate
-                decoder_layer.dropout_1.p = dropout_rate
-                decoder_layer.multihead_attention.dropout.p = dropout_rate
-                decoder_layer.dropout_2.p = dropout_rate
-                decoder_layer.feed_forward.dropout.p = dropout_rate
-                decoder_layer.dropout_3.p = dropout_rate
+                decoder_layer.masked_multihead_attention.dropout.p = dropout
+                decoder_layer.dropout_1.p = dropout
+                decoder_layer.multihead_attention.dropout.p = dropout
+                decoder_layer.dropout_2.p = dropout
+                decoder_layer.feed_forward.dropout.p = dropout
+                decoder_layer.dropout_3.p = dropout
     
+    def receive_encoder(self, encoder_model):
+        '''Sets the encoder of this model to the encoder of the given model.'''
+        self.src_embedding = encoder_model.src_embedding
+        self.encoder = encoder_model.encoder
+
+    def receive_decoder(self, decoder_model):
+        '''Sets the decoder of this model to the decoder of the given model.'''
+        self.tgt_embedding = decoder_model.tgt_embedding
+        self.decoder = decoder_model.encoder
+        self.output_linear = decoder_model.output_linear
+
     def forward(self, src_input, tgt_input, e_mask=None, d_mask=None):
         src_input = self.src_embedding(src_input) # (B, L) => (B, L, d_model)
         tgt_input = self.tgt_embedding(tgt_input) # (B, L) => (B, L, d_model)
@@ -358,9 +369,9 @@ class Transformer(pl.LightningModule):
 
 
 class Encoder(nn.Module):
-    def __init__(self, num_layers, d_model, dropout_rate, num_heads, d_k, d_ff):
+    def __init__(self, num_layers, d_model, dropout, num_heads, d_k, d_ff):
         super().__init__()
-        self.layers = nn.ModuleList([EncoderLayer(d_model, dropout_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
+        self.layers = nn.ModuleList([EncoderLayer(d_model, dropout, num_heads, d_k, d_ff) for i in range(num_layers)])
         self.layer_norm = LayerNormalization(d_model)
 
     def forward(self, x, e_mask):
@@ -370,9 +381,9 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, num_layers, d_model, dropout_rate, num_heads, d_k, d_ff):
+    def __init__(self, num_layers, d_model, dropout, num_heads, d_k, d_ff):
         super().__init__()
-        self.layers = nn.ModuleList([DecoderLayer(d_model, dropout_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
+        self.layers = nn.ModuleList([DecoderLayer(d_model, dropout, num_heads, d_k, d_ff) for i in range(num_layers)])
         self.layer_norm = LayerNormalization(d_model)
 
     def forward(self, x, e_output, e_mask, d_mask):

@@ -6,15 +6,15 @@ import math
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, d_model, dropout_rate, num_heads, d_k, d_ff):
+    def __init__(self, d_model, dropout, num_heads, d_k, d_ff):
         super().__init__()
         self.layer_norm_1 = LayerNormalization(d_model)
-        self.multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
-        self.dropout_1 = nn.Dropout(dropout_rate)
+        self.multihead_attention = MultiheadAttention(d_model, dropout, num_heads, d_k)
+        self.dropout_1 = nn.Dropout(dropout)
 
         self.layer_norm_2 = LayerNormalization(d_model)
-        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout_rate)
-        self.dropout_2 = nn.Dropout(dropout_rate)
+        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout)
+        self.dropout_2 = nn.Dropout(dropout)
 
     def forward(self, x, e_mask):
         x_1 = self.layer_norm_1(x) # (B, L, d_model)
@@ -28,19 +28,19 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, dropout_rate, num_heads, d_k, d_ff):
+    def __init__(self, d_model, dropout, num_heads, d_k, d_ff):
         super().__init__()
         self.layer_norm_1 = LayerNormalization(d_model)
-        self.masked_multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
-        self.dropout_1 = nn.Dropout(dropout_rate)
+        self.masked_multihead_attention = MultiheadAttention(d_model, dropout, num_heads, d_k)
+        self.dropout_1 = nn.Dropout(dropout)
 
         self.layer_norm_2 = LayerNormalization(d_model)
-        self.multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
-        self.dropout_2 = nn.Dropout(dropout_rate)
+        self.multihead_attention = MultiheadAttention(d_model, dropout, num_heads, d_k)
+        self.dropout_2 = nn.Dropout(dropout)
 
         self.layer_norm_3 = LayerNormalization(d_model)
-        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout_rate)
-        self.dropout_3 = nn.Dropout(dropout_rate)
+        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout)
+        self.dropout_3 = nn.Dropout(dropout)
 
     def forward(self, x, e_output, e_mask,  d_mask):
         x_1 = self.layer_norm_1(x) # (B, L, d_model)
@@ -58,7 +58,7 @@ class DecoderLayer(nn.Module):
 
 
 class MultiheadAttention(nn.Module):
-    def __init__(self, d_model, dropout_rate, num_heads, d_k):
+    def __init__(self, d_model, dropout, num_heads, d_k):
         super().__init__()
         self.num_heads = num_heads
         self.d_model = d_model
@@ -70,7 +70,7 @@ class MultiheadAttention(nn.Module):
         self.w_k = nn.Linear(d_model, d_model)
         self.w_v = nn.Linear(d_model, d_model)
 
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = nn.Dropout(dropout)
         self.attn_softmax = nn.Softmax(dim=-1)
 
         # Final output linear transformation
@@ -116,12 +116,12 @@ class MultiheadAttention(nn.Module):
 
 
 class FeedFowardLayer(nn.Module):
-    def __init__(self, d_model, d_ff, dropout_rate):
+    def __init__(self, d_model, d_ff, dropout):
         super().__init__()
         self.linear_1 = nn.Linear(d_model, d_ff, bias=True)
         self.relu = nn.ReLU()
         self.linear_2 = nn.Linear(d_ff, d_model, bias=True)
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         x = self.relu(self.linear_1(x)) # (B, L, d_ff)

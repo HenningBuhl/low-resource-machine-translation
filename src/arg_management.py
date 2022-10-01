@@ -43,7 +43,7 @@ class ArgManager():
     def add_architecture_args(self, parser):
         parser.add_argument('--num-layers', default=6, type=int, help='The number of encoder and decoder layers.')
         parser.add_argument('--d-model', default=512, type=int, help='The embedding size.')
-        parser.add_argument('--dropout-rate', default=0.1, type=float, help='The dropout rate.')
+        parser.add_argument('--dropout', default=0.1, type=float, help='The dropout rate.')
         parser.add_argument('--num-heads', default=8, type=int, help='The number of attention heads.')
         parser.add_argument('--d-ff', default=2048, type=int, help='The feed forward dimension.')
         parser.add_argument('--max-len', default=128, type=int, help='The maximum sequence length.')
