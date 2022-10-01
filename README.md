@@ -161,6 +161,9 @@ The following table shows sources that influenced the development of this reposi
 * Document code!
 * Consistent args and kwargs (named and unnamed)
 
+
+
+* Convert remaining notebooks
 * Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
 * Unit tests (+ automatic execution via GitHub Actions)
 * Accessibility is important (make notebooks easily executable in google colab!)

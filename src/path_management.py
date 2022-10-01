@@ -1,6 +1,5 @@
 from util import *
 
-
 CONST_DATA_DIR = './data'
 CONST_MODELS_DIR = './models'
 CONST_RUNS_DIR = './runs'

@@ -148,15 +148,6 @@ class Transformer(pl.LightningModule):
             return [optimizer], [scheduler]
         else:
             return optimizer
-        #return optimizer
-        #return opt
-
-    #def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
-    #    print('AAAAAAAAAAAAAAAAA')
-    #    if metric is None:
-    #        scheduler.step()
-    #    else:
-    #        scheduler.step(metric)
 
     # Validation.
     def validation_step(self, batch, batch_idx):
