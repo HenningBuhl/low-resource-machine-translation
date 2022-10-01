@@ -11,7 +11,7 @@ import os
 import pickle
 
 
-class DataPreProcessor():
+class ParallelDataPreProcessor():
     '''A class handling preprocessing of a parallel data corpus.'''
 
     def __init__(self, src_lang, tgt_lang):
@@ -176,6 +176,11 @@ class DataPreProcessor():
             if f in files:
               files.remove(f)
         return sorted([os.path.join(dir, f) for f in files])
+
+
+class BenchmarkDataPreProcessor:
+    # TODO
+    pass
 
 
 def pad_or_truncate(tokens, max_len):

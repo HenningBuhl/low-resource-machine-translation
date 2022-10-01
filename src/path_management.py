@@ -1,5 +1,6 @@
 from util import *
 
+
 CONST_BENCHMARKS_DIR = './benchmarks'
 CONST_DATA_DIR = './data'
 CONST_MODELS_DIR = './models'
@@ -7,66 +8,55 @@ CONST_RUNS_DIR = './runs'
 CONST_TOKENIZERS_DIR = './tokenizers'
 
 
-class ExperimentPathManager():
-    '''
-    A class managing all paths required for an experiment. One experiment consist of training and manging
-    one or more models.
-    '''
+class ExperimentManager():
+    '''A class managing an experiment. One experiment consists of training and managing one or more models.'''
 
-    def __init__(self, run_name, *models_names, run_dir=None):
+    def __init__(self, run_name, *model_names):
         self.run_name = run_name
-        self.models_names = models_names
 
-        # Use a new run_dir if none was passed.
-        if run_dir is None:
-            self.run_dir = os.path.join(CONST_RUNS_DIR, f'{self.run_name}-{get_time_as_string()}')
-        else:
-            self.run_dir = run_dir
+        # Run dir.
+        self.run_dir = os.path.join(CONST_RUNS_DIR, f'{self.run_name}-{get_time_as_string()}')
 
         # Args file.
         self.args_file = os.path.join(self.run_dir, 'args.json')
 
-        # Model path managers.
-        for models_name in self.models_names:
-            mpm = ModelPathManager(os.path.join(self.run_dir, models_name))
-            setattr(self, models_name, mpm)
+        # Create model managers.
+        self.model_managers = []
+        for model_name in self.model_names:
+            model_manager = ModelManager(self.run_dir, model_name)
+            self.model_managers.append(model_manager)
+            setattr(self, model_name, model_manager)
 
     def init(self):
-        '''Creates all required directories.'''
+        # Create constant directories.
+        create_dirs(CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
 
-        # Constant directories.
-        create_dirs(CONST_BENCHMARKS_DIR, CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
-
-        # Create run_dir.
+        # Create run dir.
         create_dir(self.run_dir)
 
-        # Model path managers.
-        for models_name in self.models_names:
-            mpm = getattr(self, models_name)
-            mpm.init()
+        # Initialize model managers.
+        for model_manager in self.model_managers:
+            model_manager.init()
 
+    class ModelManager():
+        def __init__(self, run_dir, model_name):
+            self.model_name = model_name
+            self.model_dir = os.path.join(self.run_dir, self.model_name)
 
-class ModelPathManager():
-    '''A class managing all paths one model requires.'''
+            # Directories.
+            self.checkpoint_dir = os.path.join(self.model_dir, 'checkpoints')
+            self.metrics_dir = os.path.join(self.model_dir, 'metrics')
 
-    def __init__(self, model_dir):
-        self.model_dir = model_dir
+            # Files.
+            self.untrained_model_file = os.path.join(self.model_dir, 'model-untrained.pt')
+            self.model_file = os.path.join(self.model_dir, 'model.pt')
+            self.metrics_file = os.path.join(self.metrics_dir, 'metrics.json')
+            self.metric_svg_template = os.path.join(self.metrics_dir, '{}.svg')
 
-        # Directories.
-        self.checkpoint_dir = os.path.join(self.model_dir, 'checkpoints')
-        self.metrics_dir = os.path.join(self.model_dir, 'metrics')
-
-        # Files.
-        self.untrained_model_file = os.path.join(self.model_dir, 'model-untrained.pt')
-        self.model_file = os.path.join(self.model_dir, 'model.pt')
-        self.metrics_file = os.path.join(self.metrics_dir, 'metrics.json')
-        self.metric_svg_template = os.path.join(self.metrics_dir, '{}.svg')
-
-    def init(self):
-        '''Creates all required directories.'''
-        create_dir(self.model_dir)
-        create_dir(self.checkpoint_dir)
-        create_dir(self.metrics_dir)
+        def init(self):
+            create_dir(self.model_dir)
+            create_dir(self.checkpoint_dir)
+            create_dir(self.metrics_dir)
 
 
 def get_parallel_data_dir(base_dir, src_lang, tgt_lang):

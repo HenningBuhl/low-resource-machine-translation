@@ -165,7 +165,7 @@ The following table shows sources that influenced the development of this reposi
 
 * Convert remaining notebooks
 * Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
-* Unit tests (+ automatic execution via GitHub Actions)
+* Unit tests (+ automatic execution via GitHub Actions) [+ force with git hooks before commit?]
 * Accessibility is important (make notebooks easily executable in google colab!)
 * Inference methods should work with batch_size > 1
 

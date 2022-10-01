@@ -15,6 +15,10 @@ experiments/.ipynb_checkpoints/
 
 # Python cache.
 src/__pycache__/
+experiments/__pycache__/
+
+# Converted python files.
+experiments/*.py
 
 
 
