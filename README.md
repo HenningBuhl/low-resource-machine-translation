@@ -32,17 +32,12 @@ It is recommended to setup a virtual environment with miniconda (python version 
 conda create -n mt python=3.10.4
 ```
 
-and install the requirements like this:
+and install the requirements inside the environment like this:
 
 ```
+conda activate mt
 pip install -r requirements.txt
 ```
-
-NOT YET DONE:
-The notebooks are designed to work in Google Colab (TODO add link). They work by either:
-
-1. Cloning the repository into your Google Drive root folder and opening a jupyter notebook (mount_drive=True).
-1. Just executing a notebook in Google Colab (mount_drive=False). Some operations in the notebooks require a lot of memory and Google Colab might crash if too much data needs to be processed in memory.
 
 ## Getting started
 
@@ -162,12 +157,16 @@ The following table shows sources that influenced the development of this reposi
 * Code needs to be revamped to enable easy parametrized execution
   * The jupyter notebooks contain a lot of duplicated code (move it to src folder)
   * `argparse` should be used in the notebooks with default parameters so that parameters can be parsed without editing the notebook or the python file
+
 * Document code!
 * Consistent args and kwargs (named and unnamed)
+
 * Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
 * Unit tests (+ automatic execution via GitHub Actions)
 * Accessibility is important (make notebooks easily executable in google colab!)
 * Inference methods should work with batch_size > 1
+
+
 
 * Setup conventions (import order, documentation, bool args strtobool and always positively formulated, etc...)
 * More model types and variations to compare transformer performance with other models

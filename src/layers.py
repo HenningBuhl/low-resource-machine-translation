@@ -6,59 +6,59 @@ import math
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, d_model, drop_out_rate, num_heads, d_k, d_ff):
+    def __init__(self, d_model, dropout_rate, num_heads, d_k, d_ff):
         super().__init__()
         self.layer_norm_1 = LayerNormalization(d_model)
-        self.multihead_attention = MultiheadAttention(d_model, drop_out_rate, num_heads, d_k)
-        self.drop_out_1 = nn.Dropout(drop_out_rate)
+        self.multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
+        self.dropout_1 = nn.Dropout(dropout_rate)
 
         self.layer_norm_2 = LayerNormalization(d_model)
-        self.feed_forward = FeedFowardLayer(d_model, d_ff, drop_out_rate)
-        self.drop_out_2 = nn.Dropout(drop_out_rate)
+        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout_rate)
+        self.dropout_2 = nn.Dropout(dropout_rate)
 
     def forward(self, x, e_mask):
         x_1 = self.layer_norm_1(x) # (B, L, d_model)
-        x = x + self.drop_out_1(
+        x = x + self.dropout_1(
             self.multihead_attention(x_1, x_1, x_1, mask=e_mask)
         ) # (B, L, d_model)
         x_2 = self.layer_norm_2(x) # (B, L, d_model)
-        x = x + self.drop_out_2(self.feed_forward(x_2)) # (B, L, d_model)
+        x = x + self.dropout_2(self.feed_forward(x_2)) # (B, L, d_model)
 
         return x # (B, L, d_model)
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, drop_out_rate, num_heads, d_k, d_ff):
+    def __init__(self, d_model, dropout_rate, num_heads, d_k, d_ff):
         super().__init__()
         self.layer_norm_1 = LayerNormalization(d_model)
-        self.masked_multihead_attention = MultiheadAttention(d_model, drop_out_rate, num_heads, d_k)
-        self.drop_out_1 = nn.Dropout(drop_out_rate)
+        self.masked_multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
+        self.dropout_1 = nn.Dropout(dropout_rate)
 
         self.layer_norm_2 = LayerNormalization(d_model)
-        self.multihead_attention = MultiheadAttention(d_model, drop_out_rate, num_heads, d_k)
-        self.drop_out_2 = nn.Dropout(drop_out_rate)
+        self.multihead_attention = MultiheadAttention(d_model, dropout_rate, num_heads, d_k)
+        self.dropout_2 = nn.Dropout(dropout_rate)
 
         self.layer_norm_3 = LayerNormalization(d_model)
-        self.feed_forward = FeedFowardLayer(d_model, d_ff, drop_out_rate)
-        self.drop_out_3 = nn.Dropout(drop_out_rate)
+        self.feed_forward = FeedFowardLayer(d_model, d_ff, dropout_rate)
+        self.dropout_3 = nn.Dropout(dropout_rate)
 
     def forward(self, x, e_output, e_mask,  d_mask):
         x_1 = self.layer_norm_1(x) # (B, L, d_model)
-        x = x + self.drop_out_1(
+        x = x + self.dropout_1(
             self.masked_multihead_attention(x_1, x_1, x_1, mask=d_mask)
         ) # (B, L, d_model)
         x_2 = self.layer_norm_2(x) # (B, L, d_model)
-        x = x + self.drop_out_2(
+        x = x + self.dropout_2(
             self.multihead_attention(x_2, e_output, e_output, mask=e_mask)
         ) # (B, L, d_model)
         x_3 = self.layer_norm_3(x) # (B, L, d_model)
-        x = x + self.drop_out_3(self.feed_forward(x_3)) # (B, L, d_model)
+        x = x + self.dropout_3(self.feed_forward(x_3)) # (B, L, d_model)
 
         return x # (B, L, d_model)
 
 
 class MultiheadAttention(nn.Module):
-    def __init__(self, d_model, drop_out_rate, num_heads, d_k):
+    def __init__(self, d_model, dropout_rate, num_heads, d_k):
         super().__init__()
         self.num_heads = num_heads
         self.d_model = d_model
@@ -70,7 +70,7 @@ class MultiheadAttention(nn.Module):
         self.w_k = nn.Linear(d_model, d_model)
         self.w_v = nn.Linear(d_model, d_model)
 
-        self.dropout = nn.Dropout(drop_out_rate)
+        self.dropout = nn.Dropout(dropout_rate)
         self.attn_softmax = nn.Softmax(dim=-1)
 
         # Final output linear transformation
@@ -116,12 +116,12 @@ class MultiheadAttention(nn.Module):
 
 
 class FeedFowardLayer(nn.Module):
-    def __init__(self, d_model, d_ff, drop_out_rate):
+    def __init__(self, d_model, d_ff, dropout_rate):
         super().__init__()
         self.linear_1 = nn.Linear(d_model, d_ff, bias=True)
         self.relu = nn.ReLU()
         self.linear_2 = nn.Linear(d_ff, d_model, bias=True)
-        self.dropout = nn.Dropout(drop_out_rate)
+        self.dropout = nn.Dropout(dropout_rate)
 
     def forward(self, x):
         x = self.relu(self.linear_1(x)) # (B, L, d_ff)

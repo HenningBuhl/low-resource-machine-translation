@@ -1,12 +1,13 @@
+from pickletools import optimize
 from torch import nn
 from torch.functional import F
 from constants import *
 from layers import *
 from data import pad_or_truncate
 from calc import top_k_top_p_filtering
+from schedulers import NoamOpt, WarumUpInverseSquareRootScheduler
+
 import torchmetrics
-
-
 import torch
 import heapq
 import math
@@ -22,9 +23,13 @@ class Transformer(pl.LightningModule):
                  tgt_tokenizer,
                  learning_rate=1e-4,
                  weight_decay=0,
+                 beta_1=0.9,
+                 beta_2=0.98,
+                 enable_scheduling=False,
+                 warm_up_steps=4000,
                  num_layers=6,
                  d_model=512,
-                 drop_out_rate=0.1,
+                 dropout_rate=0.1,
                  num_heads=8,
                  d_ff=2048,
                  max_len=128,
@@ -37,6 +42,11 @@ class Transformer(pl.LightningModule):
         super().__init__()
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.enable_scheduling = enable_scheduling
+        self.warm_up_steps = warm_up_steps
+        self.d_model = d_model
         
         d_k = d_model // num_heads
         self.max_len = max_len
@@ -50,8 +60,8 @@ class Transformer(pl.LightningModule):
         self.src_embedding = nn.Embedding(self.src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_size, d_model)
         self.positional_encoder = PositionalEncoder(d_model, max_len)
-        self.encoder = Encoder(num_layers, d_model, drop_out_rate, num_heads, d_k, d_ff)
-        self.decoder = Decoder(num_layers, d_model, drop_out_rate, num_heads, d_k, d_ff)
+        self.encoder = Encoder(num_layers, d_model, dropout_rate, num_heads, d_k, d_ff)
+        self.decoder = Decoder(num_layers, d_model, dropout_rate, num_heads, d_k, d_ff)
         self.output_linear = nn.Linear(d_model, self.tgt_vocab_size)
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -85,22 +95,22 @@ class Transformer(pl.LightningModule):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-    def set_dropout_rate(self, drop_out_rate, skip_encoder=False, skip_decoder=False):
+    def set_dropout_rate(self, dropout_rate, skip_encoder=False, skip_decoder=False):
         if not skip_encoder:
             for encoder_layer in self.encoder.layers:
-                encoder_layer.multihead_attention.dropout.p = drop_out_rate
-                encoder_layer.drop_out_1.p = drop_out_rate
-                encoder_layer.feed_forward.dropout.p = drop_out_rate
-                encoder_layer.drop_out_2.p = drop_out_rate
+                encoder_layer.multihead_attention.dropout.p = dropout_rate
+                encoder_layer.dropout_1.p = dropout_rate
+                encoder_layer.feed_forward.dropout.p = dropout_rate
+                encoder_layer.dropout_2.p = dropout_rate
 
         if not skip_decoder:
             for decoder_layer in self.decoder.layers:
-                decoder_layer.masked_multihead_attention.dropout.p = drop_out_rate
-                decoder_layer.drop_out_1.p = drop_out_rate
-                decoder_layer.multihead_attention.dropout.p = drop_out_rate
-                decoder_layer.drop_out_2.p = drop_out_rate
-                decoder_layer.feed_forward.dropout.p = drop_out_rate
-                decoder_layer.drop_out_3.p = drop_out_rate
+                decoder_layer.masked_multihead_attention.dropout.p = dropout_rate
+                decoder_layer.dropout_1.p = dropout_rate
+                decoder_layer.multihead_attention.dropout.p = dropout_rate
+                decoder_layer.dropout_2.p = dropout_rate
+                decoder_layer.feed_forward.dropout.p = dropout_rate
+                decoder_layer.dropout_3.p = dropout_rate
     
     def forward(self, src_input, tgt_input, e_mask=None, d_mask=None):
         src_input = self.src_embedding(src_input) # (B, L) => (B, L, d_model)
@@ -122,11 +132,31 @@ class Transformer(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(),
-                                lr=self.learning_rate,
-                                betas=(0.9, 0.98),
-                                eps=1e-9,
-                                weight_decay=self.weight_decay)
+        optimizer = torch.optim.Adam(self.parameters(),
+            lr=self.learning_rate,
+            betas=(0.9, 0.98),
+            eps=1e-9,
+            weight_decay=self.weight_decay
+        )
+
+        if self.enable_scheduling:
+            scheduler = {
+                'scheduler': WarumUpInverseSquareRootScheduler(optimizer, self.d_model, self.warm_up_steps),
+                'interval': 'step',
+                'frequency': 1
+            }
+            return [optimizer], [scheduler]
+        else:
+            return optimizer
+        #return optimizer
+        #return opt
+
+    #def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
+    #    print('AAAAAAAAAAAAAAAAA')
+    #    if metric is None:
+    #        scheduler.step()
+    #    else:
+    #        scheduler.step(metric)
 
     # Validation.
     def validation_step(self, batch, batch_idx):
@@ -150,7 +180,6 @@ class Transformer(pl.LightningModule):
         return logits, tgt_output
 
     def _shared_eval_step(self, logits, tgt_out, batch_idx, context):
-        #loss = F.nll_loss(logits.reshape(-1, self.tgt_vocab_size), tgt_out.reshape(-1))  # TODO check if loss below really works, then delete this line.
         loss = nn.functional.cross_entropy(
             logits.reshape(-1, self.tgt_vocab_size),
             tgt_out.reshape(-1),
@@ -338,9 +367,9 @@ class Transformer(pl.LightningModule):
 
 
 class Encoder(nn.Module):
-    def __init__(self, num_layers, d_model, drop_out_rate, num_heads, d_k, d_ff):
+    def __init__(self, num_layers, d_model, dropout_rate, num_heads, d_k, d_ff):
         super().__init__()
-        self.layers = nn.ModuleList([EncoderLayer(d_model, drop_out_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
+        self.layers = nn.ModuleList([EncoderLayer(d_model, dropout_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
         self.layer_norm = LayerNormalization(d_model)
 
     def forward(self, x, e_mask):
@@ -350,9 +379,9 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, num_layers, d_model, drop_out_rate, num_heads, d_k, d_ff):
+    def __init__(self, num_layers, d_model, dropout_rate, num_heads, d_k, d_ff):
         super().__init__()
-        self.layers = nn.ModuleList([DecoderLayer(d_model, drop_out_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
+        self.layers = nn.ModuleList([DecoderLayer(d_model, dropout_rate, num_heads, d_k, d_ff) for i in range(num_layers)])
         self.layer_norm = LayerNormalization(d_model)
 
     def forward(self, x, e_output, e_mask, d_mask):
@@ -410,28 +439,3 @@ class PriorityQueue():
     def print_objs(self):
         objs = [t[1] for t in self.queue]
         print(objs)
-
-
-# TODO move to calc.py
-def cascaded_inference(batch,
-                       src_tokenizer, tgt_tokenizer,
-                       src_pvt_model, pvt_tgt_model,
-                       score_metric,
-                       method = 'greedy',
-                       **kwargs):
-    src_input, tgt_input, tgt_output = batch 
-
-    # Convert preprocessed input back to text.
-    src_text = src_tokenizer.Decode(src_input.tolist())[0]
-    label_text = tgt_tokenizer.Decode(tgt_input.tolist())[0]
-    
-    # Pass through src-pvt model.
-    pvt_text = src_pvt_model.translate(src_text, method=method, kwargs=kwargs)
-    
-    # Pass through pvt-tgt model.
-    tgt_text = pvt_tgt_model.translate(pvt_text, method=method, kwargs=kwargs)
-    
-    # Calculate metrics.
-    score = score_metric.compute(predictions=[tgt_text], references=[[label_text]])['score']
-
-    return score, src_text, pvt_text, tgt_text, label_text
