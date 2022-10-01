@@ -1,5 +1,6 @@
 from util import *
 
+CONST_BENCHMARKS_DIR = './benchmarks'
 CONST_DATA_DIR = './data'
 CONST_MODELS_DIR = './models'
 CONST_RUNS_DIR = './runs'
@@ -34,7 +35,7 @@ class ExperimentPathManager():
         '''Creates all required directories.'''
 
         # Constant directories.
-        create_dirs(CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
+        create_dirs(CONST_BENCHMARKS_DIR, CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
 
         # Create run_dir.
         create_dir(self.run_dir)
@@ -47,6 +48,7 @@ class ExperimentPathManager():
 
 class ModelPathManager():
     '''A class managing all paths one model requires.'''
+
     def __init__(self, model_dir):
         self.model_dir = model_dir
 
@@ -55,22 +57,21 @@ class ModelPathManager():
         self.metrics_dir = os.path.join(self.model_dir, 'metrics')
 
         # Files.
-        self.untrained_model_file = os.path.join(self.model_dir, 'untrained_model.pt')
-        self.model_file = os.path.join(self.model_dir, 'final_model.pt')
+        self.untrained_model_file = os.path.join(self.model_dir, 'model-untrained.pt')
+        self.model_file = os.path.join(self.model_dir, 'model.pt')
         self.metrics_file = os.path.join(self.metrics_dir, 'metrics.json')
         self.metric_svg_template = os.path.join(self.metrics_dir, '{}.svg')
 
     def init(self):
         '''Creates all required directories.'''
-
         create_dir(self.model_dir)
         create_dir(self.checkpoint_dir)
         create_dir(self.metrics_dir)
 
 
-def get_parallel_data_dir(src_lang, tgt_lang):
-    src_tgt_data = os.path.join(CONST_DATA_DIR, f'{src_lang}-{tgt_lang}')
-    tgt_src_data = os.path.join(CONST_DATA_DIR, f'{tgt_lang}-{src_lang}')
+def get_parallel_data_dir(base_dir, src_lang, tgt_lang):
+    src_tgt_data = os.path.join(base_dir, f'{src_lang}-{tgt_lang}')
+    tgt_src_data = os.path.join(base_dir, f'{tgt_lang}-{src_lang}')
     if os.path.exists(src_tgt_data):
         return src_tgt_data
     else:
@@ -79,3 +80,7 @@ def get_parallel_data_dir(src_lang, tgt_lang):
 def get_files(dir):
     '''Return all files that are present in a given directory.'''
     return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+
+def get_dirs(dir):
+    '''Return all directories that are present in a given directory.'''
+    return [f for f in os.listdir(dir) if os.path.isdir(os.path.join(dir, f))]

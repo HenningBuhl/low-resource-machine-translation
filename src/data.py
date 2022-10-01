@@ -11,12 +11,12 @@ import os
 import pickle
 
 
-class PreProcessor():
+class DataPreProcessor():
     '''A class handling preprocessing of a parallel data corpus.'''
 
     def __init__(self, src_lang, tgt_lang):
         # Parallel corpus data dir.
-        data_dir = os.path.join(get_parallel_data_dir(src_lang, tgt_lang))
+        data_dir = os.path.join(get_parallel_data_dir(CONST_DATA_DIR, src_lang, tgt_lang))
 
         # Language directories.
         self.src_lang_dir = os.path.join(data_dir, src_lang)

@@ -81,9 +81,13 @@ class ArgManager():
         parser.add_argument('--mode', default='min', type=str, choices=['min', 'max'], help='How the monitored metric should improve.')
 
     # TODO
-    def auto_infer_args(self, args):
+    def auto_infer_args(self, args, experiment):
         '''Automatically infers arguments and sets them in the passed object.'''
-        pass
+
+        if experiment is None:
+            raise Exception('Must be an experiment')
+        args.experiment = experiment
+
 
     # TODO
     def sanity_check_args(self, args):

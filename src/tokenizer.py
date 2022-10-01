@@ -11,7 +11,7 @@ class TokenizerBuilder():
 
     def __init__(self, lang, other_lang=None):
         # Parallel corpus data dir.
-        data_dir = get_parallel_data_dir(lang, other_lang)
+        data_dir = get_parallel_data_dir(CONST_DATA_DIR, lang, other_lang)
 
         # Tokenizer paths.
         self.tokenizer_path = os.path.join(CONST_TOKENIZERS_DIR, lang)
