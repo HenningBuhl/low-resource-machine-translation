@@ -1,6 +1,15 @@
+from datetime import datetime
+
+
 import json
 import os
-from datetime import datetime
+
+
+CONST_BENCHMARKS_DIR = './benchmarks'
+CONST_DATA_DIR = './data'
+CONST_MODELS_DIR = './models'
+CONST_RUNS_DIR = './runs'
+CONST_TOKENIZERS_DIR = './tokenizers'
 
 
 def create_dir(dir):
@@ -23,7 +32,23 @@ def save_dict(file, dict):
 
 def load_dict(dict_file):
     '''Loads a dictionary from a file.'''
-    return json.load(open(dict_file))
+    return dotdict(json.load(open(dict_file)))
+
+def get_parallel_data_dir(base_dir, src_lang, tgt_lang):
+    src_tgt_data = os.path.join(base_dir, f'{src_lang}-{tgt_lang}')
+    tgt_src_data = os.path.join(base_dir, f'{tgt_lang}-{src_lang}')
+    if os.path.exists(src_tgt_data):
+        return src_tgt_data
+    else:
+        return tgt_src_data
+
+def get_files(dir):
+    '''Return all files that are present in a given directory.'''
+    return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+
+def get_dirs(dir):
+    '''Return all directories that are present in a given directory.'''
+    return [f for f in os.listdir(dir) if os.path.isdir(os.path.join(dir, f))]
 
 def get_time_as_string():
     '''Gets current time as string.'''
@@ -45,3 +70,13 @@ def is_notebook():
             return False  # Other type (?)
     except NameError:
         return False      # Probably standard Python interpreter
+
+# Dictionary which is capable of dot-notation.
+class dotdict(dict):
+    def __init__(self, *args, **kwargs):
+        super(dotdict, self).__init__(*args, **kwargs)
+        for key, value in self.items():
+            setattr(self, key, value)
+        
+    def __getattr__(self, name):
+        return self[name]

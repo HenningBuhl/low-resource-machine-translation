@@ -1,6 +1,6 @@
 from constants import *
 from tqdm import tqdm
-from path_management import CONST_TOKENIZERS_DIR, CONST_DATA_DIR, get_files, get_parallel_data_dir
+from util import *
 
 import os
 import sentencepiece as spm

@@ -56,8 +56,8 @@ class Transformer(pl.LightningModule):
 
         self.src_tokenizer = src_tokenizer
         self.tgt_tokenizer = tgt_tokenizer
-        self.src_vocab_size = src_vocab_size is src_vocab_size is not None else self.src_tokenizer.vocab_size()
-        self.tgt_vocab_size = tgt_vocab_size is tgt_vocab_size is not None else self.tgt_tokenizer.vocab_size()
+        self.src_vocab_size = src_vocab_size if src_vocab_size is not None else self.src_tokenizer.vocab_size()
+        self.tgt_vocab_size = tgt_vocab_size if tgt_vocab_size is not None else self.tgt_tokenizer.vocab_size()
 
         self.src_embedding = nn.Embedding(self.src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_size, d_model)
@@ -510,8 +510,8 @@ def cascaded_inference(batch,
 
     return score, src_text, pvt_text, tgt_text, label_text
 
-def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None)
-    args_dict = load_dict(os.path.join(dir, 'args.json'))
+def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None):
+    args = load_dict(os.path.join(dir, 'args.json'))
     model = Transformer(
         src_tokenizer,
         tgt_tokenizer,
@@ -521,7 +521,7 @@ def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None)
         d_model=args.d_model,
         dropout=args.dropout,
         num_heads=args.num_heads,
-        d_ff=args-d_ff,
+        d_ff=args.d_ff,
         max_len=args.max_len,
     )
     return model

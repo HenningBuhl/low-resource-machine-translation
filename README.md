@@ -97,6 +97,18 @@ The sh-scripts also support additional arguments (these are in snake_notation):
 * CONDA_ENV: The name of the conda env to use
 
 
+#### OneToOne
+
+TODO
+
+#### Benchmark
+
+TODO
+
+#### Translate
+
+works in notebook and as python call with --text "... ... .." but not with run.sh because bash removes quotes...
+
 TODO (make good executable sh-command lines...)
 baseline:
  default values

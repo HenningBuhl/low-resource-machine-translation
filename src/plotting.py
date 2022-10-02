@@ -25,5 +25,5 @@ def plot_metric(metrics, metric, save_path=None):
 
     if save_path is not None:
         plt.savefig(save_path)
-    plt.show()
+    #plt.show()
     plt.close()

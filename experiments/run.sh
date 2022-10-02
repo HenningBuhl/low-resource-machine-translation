@@ -76,8 +76,8 @@ if [[ $CONDA_ENV != "" ]]; then
 fi
 
 # Convert notebook to python file if not skipped.
-if [ $SKIP_CONVERT == false ]; then
-    jupyter nbconvert --to python "$EXPERIMENT".ipynb
+if ! $SKIP_CONVERT; then
+    jupyter nbconvert --to python ${EXPERIMENT}.ipynb
 fi
 
 # Call pyhton with the arguments.

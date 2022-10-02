@@ -35,7 +35,7 @@ class MetricLogger(LightningLoggerBase):
             else:
                 self.metrics[k] = [metrics[k]]
 
-    def manual_save(self, dir, file):
+    def manual_save(self, dir):
         '''Saves all metrics in a combined json file and as separate txt files for each metric.'''
         
         # Remove epoch key (TODO why is it there in the first place? some later it just disappeared...).
@@ -53,7 +53,7 @@ class MetricLogger(LightningLoggerBase):
         self.metrics['elapsed_time'] = elapsed_time
 
         # Save metrics dict as json.
-        save_dict(file, self.metrics)
+        save_dict(os.path.join(dir, 'metrics.json'), self.metrics)
 
     def reset(self):
         self.metrics = {}
