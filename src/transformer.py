@@ -5,6 +5,7 @@ from constants import *
 from layers import *
 from data import pad_or_truncate
 from schedulers import WarumUpInverseSquareRootScheduler
+from util import *
 
 import torchmetrics
 import torch
@@ -20,6 +21,8 @@ class Transformer(pl.LightningModule):
     def __init__(self,
                  src_tokenizer,
                  tgt_tokenizer,
+                 src_vocab_size=None,
+                 tgt_vocab_size=None,
                  learning_rate=1e-4,
                  weight_decay=0,
                  beta_1=0.9,
@@ -53,8 +56,8 @@ class Transformer(pl.LightningModule):
 
         self.src_tokenizer = src_tokenizer
         self.tgt_tokenizer = tgt_tokenizer
-        self.src_vocab_size = self.src_tokenizer.vocab_size()
-        self.tgt_vocab_size = self.tgt_tokenizer.vocab_size()
+        self.src_vocab_size = src_vocab_size is src_vocab_size is not None else self.src_tokenizer.vocab_size()
+        self.tgt_vocab_size = tgt_vocab_size is tgt_vocab_size is not None else self.tgt_tokenizer.vocab_size()
 
         self.src_embedding = nn.Embedding(self.src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_size, d_model)
@@ -232,8 +235,22 @@ class Transformer(pl.LightningModule):
     def receive_decoder(self, decoder_model):
         '''Sets the decoder of this model to the decoder of the given model.'''
         self.tgt_embedding = decoder_model.tgt_embedding
-        self.decoder = decoder_model.encoder
+        self.decoder = decoder_model.decoder
         self.output_linear = decoder_model.output_linear
+
+    def freeze_encoder(self):
+        for param in self.src_embedding.parameters():
+            param.requires_grad = False
+        for param in self.encoder.parameters():
+            param.requires_grad = False
+
+    def freeze_decoder(self):
+        for param in self.tgt_embedding.parameters():
+            param.requires_grad = False
+        for param in self.decoder.parameters():
+            param.requires_grad = False
+        for param in self.output_linear.parameters():
+            param.requires_grad = False
 
     def make_mask(self, src_input, tgt_input):
         e_mask = (src_input != pad_id).unsqueeze(1)  # (B, 1, L)
@@ -492,3 +509,19 @@ def cascaded_inference(batch,
     score = score_metric.compute(predictions=[tgt_text], references=[[label_text]])['score']
 
     return score, src_text, pvt_text, tgt_text, label_text
+
+def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None)
+    args_dict = load_dict(os.path.join(dir, 'args.json'))
+    model = Transformer(
+        src_tokenizer,
+        tgt_tokenizer,
+        src_vocab_size=args.src_vocab_size,
+        tgt_vocab_size=args.tgt_vocab_size,
+        num_layers=args.num_layers,
+        d_model=args.d_model,
+        dropout=args.dropout,
+        num_heads=args.num_heads,
+        d_ff=args-d_ff,
+        max_len=args.max_len,
+    )
+    return model

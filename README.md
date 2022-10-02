@@ -41,16 +41,18 @@ pip install -r requirements.txt
 
 ## Getting started
 
+### Quick Start
+
 You can either run the python files with your arguments
 
 ```
-python TrainBaseline.py --src-lang de --tgt-lang nl
+python OneToOne.py --src-lang de --tgt-lang nl
 ```
 
-or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts.
+or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts. The experiment name os the name of the .ipynb or .py files.
 
 ```
-bash TrainBaseline.sh SrcLang=de TgtLang=nl
+bash run.sh EXPERIMENT=OneToOne SrcLang=de TgtLang=nl
 ```
 
 Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into experiments/data/{lang}. The prepared data for de-nl and nl-en experiments might look like this (note that there is on folder for monolingial english data as it is optional):
@@ -75,9 +77,13 @@ Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can als
     * nl
       * mono-data.txt
 
+### Comprehensive Explanation
+
+TODO
+
 The folder `experiments` contains notebook files for each experiment. An experiment will create a folder `experiments/runs/{EXPERIMENT}` where the arguments, results and models will be saved.
 
-Each experiment is present as a notebook to enable quick prototyping and a more neat presentation. A notebook can be converted into a python file with 
+Each experiment is present as a notebook to enable quick prototyping and a more neat presentation. A notebook can be converted into a python file with
 
 ```
 jupyter nbconvert --to python EXPERIMENT.ipynb
@@ -85,11 +91,41 @@ jupyter nbconvert --to python EXPERIMENT.ipynb
 
 The sh-scripts also support additional arguments (these are in snake_notation):
 
+* EXPERIMENT: The kind of experiment to run.
 * SKIP_CONVERT: Skips the conversion of the notebook to a python file. This allows the python file to be manually edited and used without it being overwritten.
 * CONDA_PATH: The path of conda (uses miniconda default path if unspecified)
 * CONDA_ENV: The name of the conda env to use
 
-TODO is the order of experiments important? Only make it possible to train a tokenizer in Trainbaseline?
+
+TODO (make good executable sh-command lines...)
+baseline:
+ default values
+
+baseline (sw step2):
+ src_lang, encoder-model-path, freeze-encoder
+
+baseline (rsw step2):
+ tgt_lang, decoder-model-path, freeze-encoder
+
+direct:
+ pvt-lang, encoder-model-path, decoder-model-path
+
+stepwise:
+ pvt-lang, encoder-model-path, decoder-model-path
+
+reverse stepwise
+ pvt-lang, decoder-model_path, decoder-model-path
+
+TODO
+For benchmarking, put model folders with args and model.pt in /models. For cascaded models, only add args.json with content:
+
+```
+{
+    "model_type": "cascaded",
+    "src_pvt_model_path": "baseline-de-nl",
+    "pvt_tgt_model_path": "baseline-nl-en"
+}
+```
 
 ## Results
 

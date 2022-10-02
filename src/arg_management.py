@@ -79,20 +79,3 @@ class ArgManager():
         parser.add_argument('--min-delta', default=0, type=float, help='The minimum change the metric must achieve.')
         parser.add_argument('--patience', default=3, type=int, help='Number of epochs that the monitored metric has time to improve.')
         parser.add_argument('--mode', default='min', type=str, choices=['min', 'max'], help='How the monitored metric should improve.')
-
-    # TODO
-    def auto_infer_args(self, args, experiment):
-        '''Automatically infers arguments and sets them in the passed object.'''
-
-        if experiment is None:
-            raise Exception('Must be an experiment')
-        args.experiment = experiment
-
-
-    # TODO
-    def sanity_check_args(self, args):
-        '''Checks the validity of the arguments passed.'''
-        pass
-
-#parser.add_argument('--max-examples-step-2', default=-1, type=int, help='The maximum number of training examples in step 2.')  # NOTE: for step 2
-#parser.add_argument('--ckpt-path-step-2', default=None, type=str, help='The model checkpoint form which to resume training of step 2.')  # NOTE: for step 2

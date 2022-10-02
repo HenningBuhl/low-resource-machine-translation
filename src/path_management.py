@@ -11,7 +11,7 @@ CONST_TOKENIZERS_DIR = './tokenizers'
 class ExperimentManager():
     '''A class managing an experiment. One experiment consists of training and managing one or more models.'''
 
-    def __init__(self, run_name, *model_names):
+    def __init__(self, run_name, *model_names=['model']):
         self.run_name = run_name
 
         # Run dir.

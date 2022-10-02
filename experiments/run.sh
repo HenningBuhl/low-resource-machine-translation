@@ -14,7 +14,7 @@ function contains {
 
 # Special arguments that only affect the bash script.
 SPECIAL_ARGS="EXPERIMENT CONDA_PATH CONDA_ENV SKIP_CONVERT"
-EXPERIMENT="Baseline"
+EXPERIMENT=""
 CONDA_PATH=""
 CONDA_ENV=""
 SKIP_CONVERT=false
