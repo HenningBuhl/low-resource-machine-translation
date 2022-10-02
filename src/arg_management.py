@@ -66,7 +66,7 @@ class ArgManager():
         parser.add_argument('--label-smoothing', default=0, type=float, help='The amount of smoothing when calculating the loss.')
         parser.add_argument('--max-epochs', default=10, type=int, help='The maximum number of training epochs.')
         parser.add_argument('--max-examples', default=-1, type=int, help='The maximum number of training examples.')
-        parser.add_argument('--shuffle-train-data', default=True, type=strtobool, help='Whether to shuffle the training data during training.')
+        parser.add_argument('--shuffle-train-data', default=False, type=strtobool, help='Whether to shuffle the training data during training.')
         parser.add_argument('--gpus', default=1, type=int, help='The number of GPUs.')
         parser.add_argument('--num-workers', default=4, type=int, help='The number of pytorch workers.')
         parser.add_argument('--ckpt-path', default=None, type=str, help='The model checkpoint form which to resume training.')
