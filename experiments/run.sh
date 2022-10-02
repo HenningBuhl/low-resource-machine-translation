@@ -13,11 +13,10 @@ function contains {
 }
 
 # Special arguments that only affect the bash script.
-SPECIAL_ARGS="EXPERIMENT CONDA_PATH CONDA_ENV SKIP_CONVERT"
+SPECIAL_ARGS="EXPERIMENT CONDA_PATH CONDA_ENV"
 EXPERIMENT=""
 CONDA_PATH=""
 CONDA_ENV=""
-SKIP_CONVERT=false
 
 # Save script name without .sh file ending.
 SCRIPT_NAME=`basename "$0"`
@@ -40,8 +39,6 @@ do
             CONDA_PATH=$(echo $ARGUMENT | cut -f2 -d=)
         elif [[ $KEY == "CONDA_ENV" ]]; then
             CONDA_ENV=$(echo $ARGUMENT | cut -f2 -d=)
-        elif [[ $KEY == "SKIP_CONVERT" ]]; then
-            SKIP_CONVERT=true
         fi
         continue
     fi
@@ -73,11 +70,6 @@ if [[ $CONDA_ENV != "" ]]; then
     # Activate conda env.
     source "$CONDA_PATH"
     conda activate "$CONDA_ENV"
-fi
-
-# Convert notebook to python file if not skipped.
-if ! $SKIP_CONVERT; then
-    jupyter nbconvert --to python ${EXPERIMENT}.ipynb
 fi
 
 # Call pyhton with the arguments.
