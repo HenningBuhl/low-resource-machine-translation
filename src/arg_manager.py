@@ -72,7 +72,7 @@ class ArgManager():
         parser.add_argument('--ckpt-path', default=None, type=str, help='The model checkpoint form which to resume training.')
 
     # Early Stopping + Model Checkpoint.
-    def add_early_stopping_and_checkpoiting_args(self, parser):
+    def add_early_stopping_and_checkpointing_args(self, parser):
         parser.add_argument('--enable-early-stopping', default=False, type=strtobool, help='Whether to enable early stopping.')
         parser.add_argument('--enable-checkpointing', default=False, type=strtobool, help='Whether to enable checkpointing. The best and the last version of the model are saved.')
         parser.add_argument('--monitor', default='val_loss', type=str, help='The metric to monitor.')
