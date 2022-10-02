@@ -5,17 +5,25 @@ experiments/models/
 experiments/runs/
 experiments/tokenizers/
 
+# Development folder
+development/benchmarks/
+development/data/
+development/models/
+development/runs/
+development/tokenizers/
+
 # qsub files.
 experiments/*.o*
 experiments/*.e*
 experiments/qsub
 
-# Jupyter.
-experiments/.ipynb_checkpoints/
+# Jupyter checkpoints.
+development/.ipynb_checkpoints/
 
 # Python cache.
 src/__pycache__/
 experiments/__pycache__/
+development/__pycache__/
 
 
 
