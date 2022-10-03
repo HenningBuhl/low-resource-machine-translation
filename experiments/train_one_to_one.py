@@ -249,5 +249,6 @@ def main():
         plot_metric(metric_logger.metrics, metric,
                     save_path=os.path.join(metrics_dir, '{}.svg').format(metric))
 
+
 if __name__ == '__main__':
     main()

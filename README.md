@@ -46,13 +46,13 @@ pip install -r requirements.txt
 You can either run the python files with your arguments
 
 ```
-python one_to_one.py --src-lang de --tgt-lang nl
+python train_one_to_one.py --src-lang de --tgt-lang nl
 ```
 
 or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts. The experiment name os the name of the .ipynb or .py files.
 
 ```
-bash run.sh EXPERIMENT=one_to_one SrcLang=de TgtLang=nl
+bash run.sh EXPERIMENT=train_one_to_one SrcLang=de TgtLang=nl
 ```
 
 Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into experiments/data/{lang}. The prepared data for de-nl and nl-en experiments might look like this (note that there is on folder for monolingial english data as it is optional):

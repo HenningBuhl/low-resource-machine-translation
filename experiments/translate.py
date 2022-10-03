@@ -18,12 +18,13 @@ from tokenizer import *
 from transformer import *
 from util import *
 
+
 def main():
     # Define arguments with argparse.
     arg_manager = ArgManager()
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Experiment.
+    # Run.
     parser.add_argument('--model-path', default='models/model', type=str, help='The path of the model to use.')
     parser.add_argument('--text', default='example', type=str, help='The text to translate.')
     parser.add_argument('--seed', default=0, type=int, help='The random seed of the program.')
@@ -57,6 +58,7 @@ def main():
     # Translate.
     translation = model.translate(args.text, method='greedy')
     print(f'Translated:\n\t{args.text}\nTo:\n\t{translation}')
+
 
 if __name__ == '__main__':
     main()

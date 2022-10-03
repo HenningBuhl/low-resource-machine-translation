@@ -17,7 +17,6 @@ class ArgManager():
         parser.add_argument('--dev-run', default=False, type=strtobool, help='Executes a fast dev run instead of fully training.')
         parser.add_argument('--fresh-run', default=False, type=strtobool, help='Ignores all cashed data on disk, reruns generation and overwrites everything.')
         parser.add_argument('--seed', default=0, type=int, help='The random seed of the program.')
-        parser.add_argument('--eval-before-train', default=False, type=strtobool, help='Evaluate the model on the validation data before training.')
 
     # Metrics.
     def add_metrics_args(self, parser):
@@ -70,6 +69,7 @@ class ArgManager():
         parser.add_argument('--gpus', default=1, type=int, help='The number of GPUs used.')
         parser.add_argument('--num-workers', default=4, type=int, help='The number of pytorch workers.')
         parser.add_argument('--ckpt-path', default=None, type=str, help='The model checkpoint form which to resume training.')
+        parser.add_argument('--eval-before-train', default=False, type=strtobool, help='Evaluate the model on the validation data before training.')
 
     # Early Stopping + Model Checkpoint.
     def add_early_stopping_and_checkpointing_args(self, parser):

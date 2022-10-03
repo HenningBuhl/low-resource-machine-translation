@@ -180,5 +180,6 @@ def main():
                     with open(os.path.join(run_dir, f'{benchmark_name}.{model_name}.{metric}.{method}{arg_str}.txt'), 'w') as f:
                         f.write(str(score))
 
+
 if __name__ == '__main__':
     main()
