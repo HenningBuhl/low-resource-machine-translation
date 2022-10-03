@@ -28,6 +28,8 @@ def main():
     parser.add_argument('--text', default='example', type=str, help='The text to translate.')
     parser.add_argument('--seed', default=0, type=int, help='The random seed of the program.')
 
+    # TODO add inference methods, their args and metrics.
+
     # Parse args.
     if is_notebook():
         sys.argv = ['-f']  # Used to make argparse work in jupyter notebooks (all args must be optional).
@@ -41,6 +43,8 @@ def main():
 
     # Load arguments.
     m_args = load_dict(os.path.join(args.model_path, 'args.json'))
+
+    # TODO read args.model_type to enable cascaded translation (put code creating inference_fn in separate class. Then use the same code in benchmark).
 
     # Load tokenizers.
     src_tokenizer = TokenizerBuilder(m_args.src_lang).build()
