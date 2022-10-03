@@ -13,8 +13,8 @@ from constants import *
 from data import ParallelDataPreProcessor
 from metric_logging import MetricLogger
 from plotting import plot_metric
-from tokenizer import *
-from transformer import TokenizerBuilder
+from tokenizer import TokenizerBuilder
+from transformer import *
 from util import *
 
 
