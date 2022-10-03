@@ -514,5 +514,7 @@ def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None):
         num_heads=args.num_heads,
         d_ff=args.d_ff,
         max_len=args.max_len,
+        label_smoothing=args.label_smoothing,
     )
+    model.load(os.path.join(dir, 'model.pt'))
     return model
