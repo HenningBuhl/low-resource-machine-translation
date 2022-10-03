@@ -156,7 +156,7 @@ class Transformer(pl.LightningModule):
             tgt_out.reshape(-1),
             label_smoothing=self.label_smoothing,
             ignore_index=pad_id,  # pad_id happens to equal pad_idx.
-            )
+        )
         metrics = {f'{context}_loss': loss.item()}
 
         if self.track_bleu or self.track_ter or self.track_chrf:
@@ -273,7 +273,7 @@ class Transformer(pl.LightningModule):
 
         if method == 'greedy':
             translation = self.top_k_top_p_sampling(e_output, e_mask, top_k=1)
-        elif method == 'beam':
+        elif method == 'beam_search':
             translation = self.beam_search(e_output, e_mask,
                 kwargs.get('beam_size', 8))
         elif method == 'sampling':
@@ -486,30 +486,20 @@ def top_k_top_p_filtering(logits, top_k=0, top_p=1.0, filter_value=-float('inf')
     return logits
 
 
-def cascaded_inference(batch,
-                       src_tokenizer, tgt_tokenizer,
+def cascaded_inference(text,
                        src_pvt_model, pvt_tgt_model,
                        score_metric,
                        method = 'greedy',
                        **kwargs):
     '''Performs cascaded inferend with two models.'''
 
-    src_input, tgt_input, tgt_output = batch
-
-    # Convert preprocessed input back to text.
-    src_text = src_tokenizer.Decode(src_input.tolist())[0]
-    label_text = tgt_tokenizer.Decode(tgt_input.tolist())[0]
-    
     # Pass through src-pvt model.
     pvt_text = src_pvt_model.translate(src_text, method=method, kwargs=kwargs)
     
     # Pass through pvt-tgt model.
     tgt_text = pvt_tgt_model.translate(pvt_text, method=method, kwargs=kwargs)
     
-    # Calculate metrics.
-    score = score_metric.compute(predictions=[tgt_text], references=[[label_text]])['score']
-
-    return score, src_text, pvt_text, tgt_text, label_text
+    return tgt_text
 
 def load_model_from_path(dir, src_tokenizer=None, tgt_tokenizer=None):
     args = load_dict(os.path.join(dir, 'args.json'))
