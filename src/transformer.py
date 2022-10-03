@@ -155,7 +155,7 @@ class Transformer(pl.LightningModule):
             logits.reshape(-1, self.tgt_vocab_size),
             tgt_out.reshape(-1),
             label_smoothing=self.label_smoothing,
-            #ignore_index=pad_id,
+            ignore_index=pad_id,
             )
         metrics = {f'{context}_loss': loss.item()}
 
