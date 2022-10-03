@@ -89,23 +89,15 @@ Each experiment is present as a notebook to enable quick prototyping and a more 
 jupyter nbconvert --to python EXPERIMENT.ipynb
 ```
 
-The sh-scripts also support additional arguments (these are in snake_notation):
+An sh-scripts also support additional arguments (these are in snake_notation) and can be used to run the experiments with qsub or similar programs that require an sh-script:
 
-* EXPERIMENT: The kind of experiment to run.
-* SKIP_CONVERT: Skips the conversion of the notebook to a python file. This allows the python file to be manually edited and used without it being overwritten.
-* CONDA_PATH: The path of conda (uses miniconda default path if unspecified)
-* CONDA_ENV: The name of the conda env to use
-
+* EXPERIMENT: The kind of experiment to run (essentially the name of the python file without the .py extension).
+* CONDA_PATH: The path of conda (uses miniconda default path if unspecified).
+* CONDA_ENV: The name of the conda env to use (it is activated with conda activate {CONDA_ENV}). If not provided, conda will not be used.
 
 #### OneToOne
 
 TODO
-
-#### Benchmark
-
-TODO
-
-#### Translate
 
 works in notebook and as python call with --text "... ... .." but not with run.sh because bash removes quotes...
 
@@ -128,8 +120,13 @@ stepwise:
 reverse stepwise
   pvt-lang, decoder-model_path, decoder-model-path
 
+#### Benchmark
+
 TODO
 For benchmarking, put model folders with args and model.pt in /models. For cascaded models, only add args.json with content:
+
+#### Translate
+TODO
 
 ```
 {
@@ -198,36 +195,15 @@ The following table shows sources that influenced the development of this reposi
 * Adding speech into the translation directions (zero shooting transcribing, even while translating)
 * More elaborate many-to-many architectures [[7]](#7)
 * Transfer learning with pivot adapters [[2]](#2)
-
-### Misc
-
-* Make code more flexible to different users' environments
-  * .sh-scripts should include option to skip `conda activate` call
-  * .sh-scripts should include option to activate a conda environment that was parsed to them in the console
-  * .sh-scripts should include option to skip the jupyter conversion (currently a separate .sh-script exists for that purpose)
-* Code needs to be revamped to enable easy parametrized execution
-  * The jupyter notebooks contain a lot of duplicated code (move it to src folder)
-  * `argparse` should be used in the notebooks with default parameters so that parameters can be parsed without editing the notebook or the python file
-
-* Document code!
-* Consistent args and kwargs (named and unnamed)
-
-
-
-* Convert remaining notebooks
-* Git Hooks that automatically convert all .ipynb to .py files and create .sh-scripts that process all required arguments for the .py file (pre-receive).
-* Unit tests (+ automatic execution via GitHub Actions) [+ force with git hooks before commit?]
-* Accessibility is important (make notebooks easily executable in google colab!)
-* Inference methods should work with batch_size > 1
-
-
-
-* Setup conventions (import order, documentation, bool args strtobool and always positively formulated, etc...)
-* More model types and variations to compare transformer performance with other models
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers
 * Speed-up techniques of transformers
-* Multi-GPU training
+
+### Misc
+
+* Unit tests (+ automatic execution via GitHub Actions) [+ force with git hooks before commit?]
+* Inference methods should work with batch_size > 1
+* Test reworked scripts!
 
 ## Contributing
 
