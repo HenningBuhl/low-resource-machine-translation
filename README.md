@@ -111,22 +111,22 @@ works in notebook and as python call with --text "... ... .." but not with run.s
 
 TODO (make good executable sh-command lines...)
 baseline:
- default values
+  default values
 
 baseline (sw step2):
- src_lang, encoder-model-path, freeze-encoder
+  src_lang, encoder-model-path, freeze-encoder
 
 baseline (rsw step2):
- tgt_lang, decoder-model-path, freeze-encoder
+  tgt_lang, decoder-model-path, freeze-encoder
 
 direct:
- pvt-lang, encoder-model-path, decoder-model-path
+  pvt-lang, encoder-model-path, decoder-model-path
 
 stepwise:
- pvt-lang, encoder-model-path, decoder-model-path
+  pvt-lang, encoder-model-path, decoder-model-path
 
 reverse stepwise
- pvt-lang, decoder-model_path, decoder-model-path
+  pvt-lang, decoder-model_path, decoder-model-path
 
 TODO
 For benchmarking, put model folders with args and model.pt in /models. For cascaded models, only add args.json with content:
@@ -134,8 +134,11 @@ For benchmarking, put model folders with args and model.pt in /models. For casca
 ```
 {
     "model_type": "cascaded",
+    "src_lang": "de",
+    "pvt_lang": "nl",
+    "tgt_lang": "en",
     "src_pvt_model_path": "baseline-de-nl",
-    "pvt_tgt_model_path": "baseline-nl-en"
+    "pvt_tgt_model_path": "baseline-nl-en",
 }
 ```
 
