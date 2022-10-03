@@ -178,8 +178,35 @@ class ParallelDataPreProcessor():
 
 
 class BenchmarkDataPreProcessor:
-    # TODO
-    pass
+    '''A class handling file finding and preprocessing of a parallel data corpus'''
+
+    def __init__(self, benchmark_dir):
+        self.benchmark_dir = benchmark_dir
+    
+    def get_src_tgt_sentences(src_lang, tgt_lang):
+        # Assume the benchmark contains folders for each language.
+        src_dir = os.path.join(self.benchmark_dir, src_lang)
+        tgt_dir = os.path.join(self.benchmark_dir, tgt_lang)
+
+        # Use parallel data dirs if benchmark folder does not contain folder dor each language.
+        if not os.path.exists(src_dir) or not os.path.exists(tgt_dir):
+            parallel_data_dir = get_parallel_data_dir(self.benchmark_dir, src_lang, tgt_lang)
+            src_dir = os.path.join(parallel_data_dir, src_lang)
+            tgt_dir = os.path.join(parallel_data_dir, tgt_lang)
+
+        # Read sentences from source files.
+        src_files = sorted(get_files(src_dir))
+        for src_file in src_files:
+            with open(src_file, 'r', encoding='utf8') as f:
+                src_sentences.append(f.readlines())
+
+        # Read sentences from target files.
+        tgt_files = sorted(get_files(tgt_dir))
+        for tgt_file in tgt_files:
+            with open(tgt_file, 'r', encoding='utf8') as f:
+                tgt_sentences.append(f.readlines())
+
+        return src_sentences, tgt_sentences
 
 
 def pad_or_truncate(tokens, max_len):
