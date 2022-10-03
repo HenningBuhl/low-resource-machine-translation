@@ -85,12 +85,12 @@ class ParallelDataPreProcessor():
         src_val_examples, tgt_val_examples = zip(*val_examples)
         src_test_examples, tgt_test_examples = zip(*test_examples)
 
-        with open(self.src_train_file, 'w') as f: f.write(''.join(src_train_examples))
-        with open(self.src_val_file, 'w') as f: f.write(''.join(src_val_examples))
-        with open(self.src_test_file, 'w') as f: f.write(''.join(src_test_examples))
-        with open(self.tgt_train_file, 'w') as f: f.write(''.join(tgt_train_examples))
-        with open(self.tgt_val_file, 'w') as f: f.write(''.join(tgt_val_examples))
-        with open(self.tgt_test_file, 'w') as f: f.write(''.join(tgt_test_examples))
+        with open(self.src_train_file, 'w', encoding='utf8') as f: f.write(''.join(src_train_examples))
+        with open(self.src_val_file, 'w', encoding='utf8') as f: f.write(''.join(src_val_examples))
+        with open(self.src_test_file, 'w', encoding='utf8') as f: f.write(''.join(src_test_examples))
+        with open(self.tgt_train_file, 'w', encoding='utf8') as f: f.write(''.join(tgt_train_examples))
+        with open(self.tgt_val_file, 'w', encoding='utf8') as f: f.write(''.join(tgt_val_examples))
+        with open(self.tgt_test_file, 'w', encoding='utf8') as f: f.write(''.join(tgt_test_examples))
 
     def pre_process(self, src_tokenizer, tgt_tokenizer, batch_size, shuffle, max_examples, max_len, fresh_run=False):
         if self.is_data_tokenized() and not fresh_run:
