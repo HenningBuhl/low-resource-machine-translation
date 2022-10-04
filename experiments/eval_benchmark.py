@@ -142,7 +142,7 @@ def main():
                 pvt_tgt_model = load_model_from_path(args.pvt_tgt_model_path, pvt_tokenizer, tgt_tokenizer)
 
                 # Create function that translates input text (model_type agnostic for further code below).
-                inference_fn = lambda text, method, kwargs : cascaded_inference(text, src_pvt_model, pvt_tgt_model, method, kwargs)
+                inference_fn = lambda text, method, kwargs : cascaded_inference(text, src_pvt_model, pvt_tgt_model, method, **kwargs)
             elif model_type == 'one-to-one':
                 # Load tokenizers.
                 src_tokenizer = TokenizerBuilder(args.src_lang).build()
@@ -152,7 +152,7 @@ def main():
                 model = load_model_from_path(os.path.join(CONST_MODELS_DIR, model_name), src_tokenizer, tgt_tokenizer)
 
                 # Create function that translates input text (model_type agnostic for further code below).
-                inference_fn = lambda text, method, kwargs : model.transalte(text, method, kwargs)
+                inference_fn = lambda text, method, kwargs : model.translate(text, method, **kwargs)
             else:
                 raise Exception(f'Unknown model type {model_type}.')
 
