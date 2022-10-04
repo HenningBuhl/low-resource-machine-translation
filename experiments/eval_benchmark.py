@@ -59,8 +59,8 @@ def main():
     from pytorch_lightning import seed_everything
     seed_everything(args.seed, workers=True)
 
-    # Create constant dirs.
-    create_dirs(CONST_BENCHMARKS_DIR, CONST_DATA_DIR, CONST_MODELS_DIR, CONST_RUNS_DIR, CONST_TOKENIZERS_DIR)
+    # Create runs dir.
+    create_dirs(CONST_RUNS_DIR)
 
     # Create run dir.
     run_dir = os.path.join(CONST_RUNS_DIR, f'benchmark-{get_time_as_string()}')

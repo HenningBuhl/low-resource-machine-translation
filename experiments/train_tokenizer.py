@@ -37,7 +37,7 @@ def main():
     print(f'Arguments:')
     print(args)
 
-    # Create tokenizer dir.
+    # Create tokenizers dir.
     create_dir(CONST_TOKENIZERS_DIR)
 
     # Train tokenizer.
