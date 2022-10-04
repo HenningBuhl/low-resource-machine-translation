@@ -32,7 +32,7 @@ def save_dict(file, dict):
 
 def load_dict(dict_file):
     '''Loads a dictionary from a file.'''
-    return dotdict(json.load(open(dict_file)))
+    return DotDict(json.load(open(dict_file)))
 
 def get_parallel_data_dir(base_dir, src_lang, tgt_lang):
     src_tgt_data = os.path.join(base_dir, f'{src_lang}-{tgt_lang}')
@@ -72,9 +72,9 @@ def is_notebook():
         return False      # Probably standard Python interpreter
 
 # Dictionary which is capable of dot-notation.
-class dotdict(dict):
+class DotDict(dict):
     def __init__(self, *args, **kwargs):
-        super(dotdict, self).__init__(*args, **kwargs)
+        super(DotDict, self).__init__(*args, **kwargs)
         for key, value in self.items():
             setattr(self, key, value)
         
