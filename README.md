@@ -206,7 +206,7 @@ Several pivoting techniques were employed to test their effects on a simulated l
 | 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
 | 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
 
-All models reach a reasonable score with unlimited sentences (DE-EN). The performance of the baseline is very low when only given a few thousand sentences. But the pivoting techniques can amend this problem, due to their pretraining on the (source-pivot) and (pivot-target) data. The improvement is especially pronounced in the 10k and 20k sentence cases.
+All models reach a reasonable score with unlimited sentences. The performance of the baseline is very low when only given a few thousand sentences. But the pivoting techniques can amend this problem, due to their pretraining on the (source-pivot) and (pivot-target) data. The improvement is especially pronounced in the 10k and 20k sentence cases. The performance of the techniques are similar but DP < SWP < RSWP is the general order regarding the test score. DP has the advantage of no extra full traning step like in SWP and RSWP (step 2 model).
 
 </details>
 
