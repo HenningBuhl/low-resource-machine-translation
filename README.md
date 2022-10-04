@@ -17,8 +17,6 @@
     * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with--german-dutch-english--as--source-pivot-target--triplet)
   * [Credit](#credit)
   * [To-Dos](#to-dos)
-    * [Implementation](#implementation)
-    * [Miscellaneous](#miscellaneous)
   * [Contributing](#contributing)
   * [Conventions](#conventions)
   * [License](#license)
@@ -223,8 +221,6 @@ The following table shows sources that influenced the development of this reposi
 
 ## To-Dos
 
-### Implementation
-
 * Cross lingual encoder [[2]](#2)
 * Use encoders of different but similar languages (e.g. German-X encoder for Dutch-X translation) either frozen or unfrozen and observe the effects
 * Teacher-Student training
@@ -243,10 +239,6 @@ The following table shows sources that influenced the development of this reposi
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers
 * Speed-up techniques of transformers
-
-### Miscellaneous
-
-* Inference methods should work with batch_size > 1
 
 ## Contributing
 

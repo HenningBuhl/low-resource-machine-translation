@@ -276,7 +276,7 @@ class Transformer(pl.LightningModule):
 
         return translation
 
-    def beam_search(self, e_output, e_mask, beam_size):  # TODO beam search should share code with the other inference methods.
+    def beam_search(self, e_output, e_mask, beam_size):
         cur_queue = PriorityQueue()
         for k in range(beam_size):
             cur_queue.put(BeamNode(sos_id, -0.0, [sos_id]))
