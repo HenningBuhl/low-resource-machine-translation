@@ -183,7 +183,7 @@ class BenchmarkDataPreProcessor:
     def __init__(self, benchmark_dir):
         self.benchmark_dir = benchmark_dir
     
-    def get_src_tgt_sentences(src_lang, tgt_lang):
+    def get_src_tgt_sentences(self, src_lang, tgt_lang):
         # Assume the benchmark contains folders for each language.
         src_dir = os.path.join(self.benchmark_dir, src_lang)
         tgt_dir = os.path.join(self.benchmark_dir, tgt_lang)
@@ -195,16 +195,18 @@ class BenchmarkDataPreProcessor:
             tgt_dir = os.path.join(parallel_data_dir, tgt_lang)
 
         # Read sentences from source files.
+        src_sentences = []
         src_files = sorted(get_files(src_dir))
         for src_file in src_files:
             with open(src_file, 'r', encoding='utf8') as f:
-                src_sentences.append(f.readlines())
+                src_sentences.extend(f.readlines())
 
         # Read sentences from target files.
+        tgt_sentences = []
         tgt_files = sorted(get_files(tgt_dir))
         for tgt_file in tgt_files:
             with open(tgt_file, 'r', encoding='utf8') as f:
-                tgt_sentences.append(f.readlines())
+                tgt_sentences.extend(f.readlines())
 
         return src_sentences, tgt_sentences
 
