@@ -158,7 +158,11 @@ def main():
                     translation = inference_fn(text, method, kwargs)
                     translations.append(translation)
 
-                # iterate over all metrics, calcualte them and save the result.
+                # Save the translations produces with the medhot and kwargs.
+                with open(os.path.join(results_dir, f'{benchmark_name}.{model_name}.{method}{arg_str}.translations.txt'), 'w', encoding='utf8') as f:
+                    f.write('n'.join(translations))
+
+                # Iterate over all metrics, calcualte them and save the result.
                 for metric, metric_fn in metrics.items():
                     score = metric_fn(translations, reference_sentences).item()
                     arg_str = '' if len(kwargs) == 0 else ('-' + '-'.join([f'{key}={value}' for key, value in kwargs.items()]))
