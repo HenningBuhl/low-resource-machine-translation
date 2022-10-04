@@ -123,7 +123,7 @@ Then perform direct pivoting on the decoder from step 2 and the encoder from the
 Reverse step-wise pivoting is similar to step-wise pivoting but freezes the decoder instead of the encoder. To train the step 2 model, use the following command
 
 ```
-python train_one_to_one.py --name rsw-de-nl-step-2 --src-lang nl --tgt-lang en --decoder-model-path models/baseline-nl-en --freeze-decoder True
+python train_one_to_one.py --name rsw-de-nl-step-2 --src-lang de --tgt-lang nl --decoder-model-path models/baseline-nl-en --freeze-decoder True
 ```
 
 Then perform direct pivoting on the encoder from step 2 and the decoder from the step 1 model.
