@@ -198,14 +198,14 @@ class BenchmarkDataPreProcessor:
         src_sentences = []
         src_files = sorted(get_files(src_dir))
         for src_file in src_files:
-            with open(src_file, 'r', encoding='utf8') as f:
+            with open(os.path.join(src_dir, src_file), 'r', encoding='utf8') as f:
                 src_sentences.extend(f.readlines())
 
         # Read sentences from target files.
         tgt_sentences = []
         tgt_files = sorted(get_files(tgt_dir))
         for tgt_file in tgt_files:
-            with open(tgt_file, 'r', encoding='utf8') as f:
+            with open(os.path.join(tgt_dir, tgt_file), 'r', encoding='utf8') as f:
                 tgt_sentences.extend(f.readlines())
 
         return src_sentences, tgt_sentences
