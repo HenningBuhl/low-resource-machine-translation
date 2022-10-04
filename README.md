@@ -212,7 +212,7 @@ All models reach a reasonable score with unlimited sentences. The performance of
 
 ## Credit
 
-The following table shows sources that influenced the development of this repository.
+The following table shows sources that influenced the code development of this repository.
 
 | Source      | Impact      |
 | ----------- | ----------- |
@@ -239,6 +239,7 @@ The following table shows sources that influenced the development of this reposi
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers
 * Speed-up techniques of transformers
+* This repository [12](12) is a good source for resources and further experiments to implement
 
 ## Contributing
 
@@ -278,3 +279,4 @@ This project uses an MIT [LICENSE](/LICENSE).
 Multi-Lingual Neural Machine Translation (https://arxiv.org/pdf/1606.04164.pdf)
 * <a id="10">[10]</a> Google’s Multilingual Neural Machine Translation System: Enabling Zero-Shot Translation (https://arxiv.org/pdf/1611.04558.pdf)
 * <a id="11">[11]</a> MULTI-TASK SEQUENCE TO SEQUENCE LEARNING (https://arxiv.org/pdf/1511.06114.pdf)
+* <a id="12">[12]</a> Good Papers (https://github.com/hoangcuong2011/Good-Papers)
