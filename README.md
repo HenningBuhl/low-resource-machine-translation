@@ -1,28 +1,34 @@
 # Low-Resource Machine Translation
 
-<b>!!! This repository is still in an early stage and needs some future-proofing and refactoring first !!!</b>
-
 ## Table of Contents
 
-* [Introduction](#introduction)
-* [Installation](#installation)
-* [Getting started](#getting-started)
-* [Results](#results)
-  * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with-german-dutch-english-as-source-pivot-target-triplet)
-* [Credit](#credit)
-* [Contributing](#contributing)
-* [To-Dos](#to-dos)
+* [Low-Resource Machine Translation](#low-resource-machine-translation)
+  * [Table of Contents](#table-of-contents)
+  * [Introduction](#introduction)
+  * [Installation](#installation)
+  * [Getting started](#getting-started)
   * [Experiments](#experiments)
-  * [Misc](#misc)
-  * [Quality of Life](#quality-of-life)
-* [License](#license)
-* [References](#references)
+    * [Train a Baseline Model](#train-a-baseline-model)
+    * [Direct Pivoting](#direct-pivoting)
+    * [Step-wise Pivoting](#step-wise-pivoting)
+    * [Reverse Step-wise Pivoting](#reverse-step-wise-pivoting)
+    * [Benchmark](#benchmark)
+  * [Results](#results)
+    * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with--german-dutch-english--as--source-pivot-target--triplet)
+  * [Credit](#credit)
+  * [To-Dos](#to-dos)
+    * [Implementation](#implementation)
+    * [Miscellaneous](#miscellaneous)
+  * [Contributing](#contributing)
+  * [Conventions](#conventions)
+  * [License](#license)
+  * [References](#references)
 
 ## Introduction
 
-The motivation for this repository was to make experiments from these papers [[1]](#1) [[2]](#2) [[3]](#3) publicly available.
+The motivation for this repository was to implement pivoting-related experiments from these papers [[1]](#1) [[2]](#2) [[3]](#3) and make them publicly available.
 
-Techniques that perform well in a low-resource setting are the focus. Pivoting is a method that can amend a low-resource situation. The concept of pivoting was the first milestone to implement:
+How to run the implemented experiments is explained in the [experiments](#experiments) section.
 
 ## Installation
 
@@ -35,27 +41,12 @@ conda create -n mt python=3.10.4
 and install the requirements inside the environment like this:
 
 ```
-conda activate mt
 pip install -r requirements.txt
 ```
 
 ## Getting started
 
-### Quick Start
-
-You can either run the python files with your arguments
-
-```
-python train_one_to_one.py --src-lang de --tgt-lang nl
-```
-
-or use the sh.scripts. Arguments that are internally passed to the python program become PascalCase for the sh-scripts. The experiment name os the name of the .ipynb or .py files.
-
-```
-bash run.sh EXPERIMENT=train_one_to_one SrcLang=de TgtLang=nl
-```
-
-Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into experiments/data/{lang}. The prepared data for de-nl and nl-en experiments might look like this (note that there is on folder for monolingial english data as it is optional):
+To train a model that translates from one language to another, put parallel corpus data into `experiments/data/{src}-{tgt}/{lang}` (order can also be {tgt}-{src}) and monolingula data (optional, only used for tokenizer training) into `experiments/data/{lang}`. The final folders can contain 1 or more files which must be named consistently across different languages. The prepared data for de-nl and nl-en experiments might look like this (note that there is no folder for monolingial english data as it is optional):
 
 * experiments
   * data
@@ -77,56 +68,71 @@ Put parallel corpus data into experiments/data/{src}-{tgt}/{lang} (order can als
     * nl
       * mono-data.txt
 
-### Comprehensive Explanation
-
-TODO
-
-The folder `experiments` contains notebook files for each experiment. An experiment will create a folder `experiments/runs/{EXPERIMENT}` where the arguments, results and models will be saved.
-
-Each experiment is present as a notebook to enable quick prototyping and a more neat presentation. A notebook can be converted into a python file with
+You can either run the python files with your arguments
 
 ```
-jupyter nbconvert --to python EXPERIMENT.ipynb
+python train_one_to_one.py --src-lang de --tgt-lang nl
 ```
 
-An sh-scripts also support additional arguments (these are in snake_notation) and can be used to run the experiments with qsub or similar programs that require an sh-script:
+or use the run.sh-script. The script passes arguments to the python program. The script uses PascaslCase for those kind of arguments. Lists are passed comma separated.
 
-* EXPERIMENT: The kind of experiment to run (essentially the name of the python file without the .py extension).
+```
+bash run.sh EXPERIMENT=train_one_to_one SrcLang=de TgtLang=nl
+```
+
+The sh-script also support additional arguments (these are in SNAKE_NOTATION) and can be used to run the experiments with qsub or similar programs that require an sh-script.
+
+* EXPERIMENT: The kind of experiment to run (the name of the python file without the .py extension).
 * CONDA_PATH: The path of conda (uses miniconda default path if unspecified).
 * CONDA_ENV: The name of the conda env to use (it is activated with conda activate {CONDA_ENV}). If not provided, conda will not be used.
 
-#### OneToOne
+## Experiments
 
-TODO
+Some experiments require preexisting models. When the following sections mention a model being 'saved', it means that a `model.pt` file and an `args.json` file are placed in a directory. This directory can then be used as a `model_path` (or similarly named arguments). It is recommended to save all your models in the `experiments/models` directory for later benchmarking.
 
-works in notebook and as python call with --text "... ... .." but not with run.sh because bash removes quotes...
+### Train a one-to-one Model
 
-TODO (make good executable sh-command lines...)
-baseline:
-  default values
+This command will train a simple model that translates from the src_lang to the tgt_lang.
 
-baseline (sw step2):
-  src_lang, encoder-model-path, freeze-encoder
+```
+python train_one_to_one.py --name baseline-de-nl --src-lang de --tgt-lang nl
+```
 
-baseline (rsw step2):
-  tgt_lang, decoder-model-path, freeze-encoder
+To invesigate the effects of pivoting compared to a baseline model that only uses a very limited amount of data, the argument `--max-examples` can be used to artificially limited the number of sentences.
 
-direct:
-  pvt-lang, encoder-model-path, decoder-model-path
+### Direct Pivoting
 
-stepwise:
-  pvt-lang, encoder-model-path, decoder-model-path
+You need two models that can perform (src, pvt) and (pvt, tgt) respectively to perform direct pivoting. Save these models and pass their paths to the new training run.
 
-reverse stepwise
-  pvt-lang, decoder-model_path, decoder-model-path
+```
+python train_one_to_one.py --name dp-de-nl-en --src-lang de --tgt-lang en --encoder-model-path models/baseline-de-nl --decoder-model-path models/baseline-nl-en
+```
 
-#### Benchmark
+The `max-examples` is again a good argument to adjust in various runs to test the effects that different amounts of data have on the performance.
 
-TODO
-For benchmarking, put model folders with args and model.pt in /models. For cascaded models, only add args.json with content:
+### Step-wise Pivoting
 
-#### Translate
-TODO
+To train the step 2 model, use the following command
+
+```
+python train_one_to_one.py --name sw-nl-en-step-2 --src-lang nl --tgt-lang en --encoder-model-path models/baseline-de-nl --freeze-encoder True
+```
+
+Then perform direct pivoting on the decoder from step 2 and the encoder from the step 1 model.
+
+### Reverse Step-wise Pivoting
+
+Reverse step-wise pivoting is similar to step-wise pivoting but freezes the decoder instead of the encoder. To train the step 2 model, use the following command
+
+```
+python train_one_to_one.py --name rsw-de-nl-step-2 --src-lang nl --tgt-lang en --decoder-model-path models/baseline-nl-en --freeze-decoder True
+```
+
+Then perform direct pivoting on the encoder from step 2 and the decoder from the step 1 model.
+
+### Benchmark
+
+For benchmarking, save all the models to be benchmarked in the `experiments/models` directory. For cascaded models, only add args.json with content:
 
 ```
 {
@@ -135,8 +141,47 @@ TODO
     "pvt_lang": "nl",
     "tgt_lang": "en",
     "src_pvt_model_path": "baseline-de-nl",
-    "pvt_tgt_model_path": "baseline-nl-en",
+    "pvt_tgt_model_path": "baseline-nl-en"
 }
+```
+
+This will create a cascaded model from the given models. Data for benchmarks is put in `experiments/benchmark`. Each benchmark gets its own folder containing its data. It might look like this:
+
+* experiments
+  * benchmark
+    * flores
+      * de
+        * file-1.txt
+        * file-2.txt
+      * nl
+        * file-1.txt
+        * file-2.txt
+      * en
+        * file-1.txt
+        * file-2.txt
+    * tatoeba
+      * de-nl
+        * de
+          * file.txt
+        * nl
+          * file.txt
+      * de-en
+        * de
+          * file.txt
+        * en
+          * file.txt
+      * nl-en
+        * nl
+          * file.txt
+        * en
+          * file.txt
+
+The final directories can contain 1 or more files, just like the `experiments/data/{src}-{tgt}/{lang}` directories. Some benchmarks provide a set of sentences which have been translated into all available languages (e.g. flores). Others contain parallel data for each src-tgt pair (e.g. tatoeba). This will lead to a different folder setup depending on which kind of benchmark you use. Both types are supported, as seen above.
+
+Now you are ready to benchmark your models on your benchmarks.
+
+```
+python eval_benchmark.py
 ```
 
 ## Results
@@ -145,7 +190,7 @@ TODO
 
 <details><summary>Results</summary>
 
-The experiments use the WikiMatrix [[4]](#4) dataset.
+The experiments used the WikiMatrix [[4]](#4) dataset.
 
 | Language Pair  | Sentences |
 | -------------- | --------- |
@@ -163,7 +208,7 @@ Several pivoting techniques were employed to test their effects on a simulated l
 | 50k                 | 13.301   | 26.278   | 26.301   | 27.387   |
 | 100k                | 20.077   | 28.461   | 28.412   | 29.050   |
 
-All models reach a reasonable score with unlimited sentences. The performance of the baseline is very low when only given a few thousand sentences. But the pivoting techniques can amend this problem, due to their pretraining on the (source-pivot) and (pivot-target).
+All models reach a reasonable score with unlimited sentences (DE-EN). The performance of the baseline is very low when only given a few thousand sentences. But the pivoting techniques can amend this problem, due to their pretraining on the (source-pivot) and (pivot-target) data. The improvement is especially pronounced in the 10k and 20k sentence cases.
 
 </details>
 
@@ -178,7 +223,7 @@ The following table shows sources that influenced the development of this reposi
 
 ## To-Dos
 
-### Experiments
+### Implementation
 
 * Cross lingual encoder [[2]](#2)
 * Use encoders of different but similar languages (e.g. German-X encoder for Dutch-X translation) either frozen or unfrozen and observe the effects
@@ -199,11 +244,9 @@ The following table shows sources that influenced the development of this reposi
 * Attention variations of transformers
 * Speed-up techniques of transformers
 
-### Misc
+### Miscellaneous
 
-* Unit tests (+ automatic execution via GitHub Actions) [+ force with git hooks before commit?]
 * Inference methods should work with batch_size > 1
-* Test reworked scripts!
 
 ## Contributing
 
@@ -211,15 +254,19 @@ This repository is still in an early and immature state. It would be best if a c
 
 Here is a list of tasks that would help the progress of this repository and research:
 
+* Use it to experiment!
 * Perform existing (and future) experiments on different source-pivot-target triplets
 * Feedback
 * Feature requests
 * Bug reporting
-* Any task from the [To-Dos](#to-dos)
 
-If you find an error, a mistake, something does not work or you have an idea for a feature or an improvement - do not hesitate to create a GitHub issue on that topic.
+If you find an error, a mistake, something does not work or you have an idea for a feature or an improvement - do not hesitate to create a GitHub issue or a PR on that topic.
 
 Contributing is done via PRs. See the [CONTRIBUTING](/CONTRIBUTING) file.
+
+## Conventions
+
+Conventions can be seen in the [CONVENTIONS](/CONVENTIONS) file.
 
 ## License
 
