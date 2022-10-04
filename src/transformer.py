@@ -478,13 +478,11 @@ def top_k_top_p_filtering(logits, top_k=0, top_p=1.0, filter_value=-float('inf')
 
 def cascaded_inference(text,
                        src_pvt_model, pvt_tgt_model,
-                       score_metric,
-                       method = 'greedy',
-                       **kwargs):
+                       method = 'greedy', **kwargs):
     '''Performs cascaded inferend with two models.'''
 
     # Pass through src-pvt model.
-    pvt_text = src_pvt_model.translate(src_text, method=method, kwargs=kwargs)
+    pvt_text = src_pvt_model.translate(text, method=method, kwargs=kwargs)
     
     # Pass through pvt-tgt model.
     tgt_text = pvt_tgt_model.translate(pvt_text, method=method, kwargs=kwargs)
