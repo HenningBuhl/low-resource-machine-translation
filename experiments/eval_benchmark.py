@@ -74,37 +74,29 @@ def main():
     save_dict(os.path.join(run_dir, 'args.json'), args.__dict__)
 
     # Which inference methods to perform.
-    methods = []
     runs = [] # (method, kwargs)
     if args.use_greedy:
-        methods.append('greedy')
         runs.append(('greedy', {}))
-
     if args.use_beam_search:
-        methods.append('beam_search')
         for beam_size in args.beam_size:
             runs.append(('beam_search', {'beam_size': beam_size}))
-
     if args.use_top_k:
-        methods.append('top_k')
         for top_k in args.top_k:
             runs.append(('sampling', {'top_k': top_k}))
-
     if args.use_top_p:
         for top_p in args.top_p:
             runs.append(('sampling', {'top_p': top_p}))
+    print(f'The following inference configs are used: {runs}')
 
     # Which metrics to record.
     metrics = {}
-
     if args.track_bleu:
         metrics['bleu'] = torchmetrics.SacreBLEUScore(tokenize='char')
-
     if args.track_ter:
         metrics['ter'] = torchmetrics.TranslationEditRate()
-
     if args.track_chrf:
         metrics['chrf'] = torchmetrics.CHRFScore()
+    print(f'The following metrics are recorded: {metrics}')
 
     ########################
     # Benchmark.
@@ -158,6 +150,8 @@ def main():
 
             # Iterate over inference methods.
             for method, kwargs in runs:
+                print(f'Method: {method} with args: {kwargs}')
+
                 # Translate all source sentences.
                 translations = []
                 for text in src_sentences:
