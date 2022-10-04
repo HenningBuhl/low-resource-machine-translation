@@ -38,7 +38,6 @@ class Transformer(pl.LightningModule):
                  label_smoothing=0.0,
                  track_bleu=True,
                  track_ter=False,
-                 track_tp=False,
                  track_chrf=False,
                  ):
         super().__init__()
@@ -79,11 +78,6 @@ class Transformer(pl.LightningModule):
         if self.track_ter:
             self.tracked_metrics.append('ter')
             self.ter_metric = torchmetrics.TranslationEditRate()
-
-        self.track_tp = track_tp
-        if self.track_tp:
-            self.tracked_metrics.append('tp')
-            self.tp_metric = torch.exp
 
         self.track_chrf = track_chrf
         if self.track_chrf:
@@ -172,10 +166,6 @@ class Transformer(pl.LightningModule):
             ter = self.ter_metric(predictions, references).item()
             metrics[f'{context}_ter'] = ter
 
-        if self.track_tp:
-            tp = self.tp_metric(loss).item()
-            metrics[f'{context}_tp'] = tp
-          
         if self.track_chrf:
             chrf = self.chrf_metric(predictions, references).item()
             metrics[f'{context}_chrf'] = chrf

@@ -28,6 +28,7 @@ def main():
     ########################
 
     # Define arguments with argparse.
+    arg_manager = ArgManager()
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Experiment.

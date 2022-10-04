@@ -22,7 +22,6 @@ class ArgManager():
     def add_metrics_args(self, parser):
         parser.add_argument('--track-bleu', default=True, type=strtobool, help='Whether to track the SacreBLEU score metric.')
         parser.add_argument('--track-ter', default=False, type=strtobool, help='Whether to track the translation edit rate metric.')
-        parser.add_argument('--track-tp', default=False, type=strtobool, help='Whether to track the translation perplexity metric.')
         parser.add_argument('--track-chrf', default=False, type=strtobool, help='Whether to track the CHRF score metric.')
 
     # Data.

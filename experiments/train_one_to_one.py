@@ -145,7 +145,6 @@ def main():
         label_smoothing=args.label_smoothing,
         track_bleu=args.track_bleu,
         track_ter=args.track_ter,
-        track_tp=args.track_tp,
         track_chrf=args.track_chrf,
     )
 
