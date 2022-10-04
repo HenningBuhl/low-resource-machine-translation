@@ -151,7 +151,7 @@ def main():
     # Stitch decoder.
     if args.decoder_model_path is not None:
         decoder_model = load_model_from_path(args.decoder_model_path)
-        model.receive_decoder(encoder_model)
+        model.receive_decoder(decoder_model)
         if args.freeze_decoder:
             model.freeze_decoder()
         else:
