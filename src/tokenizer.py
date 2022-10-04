@@ -14,16 +14,11 @@ class TokenizerBuilder():
         self.tokenizer_path = os.path.join(CONST_TOKENIZERS_DIR, lang)
         self.tokenizer_sp_path = os.path.join(self.tokenizer_path, lang)
 
-        # Catch incorrect order of experiments.
-        if not os.path.exists(self.tokenizer_path) and other_lang is None:
-            raise Exception('You are trying to load a tokenizer that has not been trained yet. '
-              'First, train a tokeniter or a model which will train and save a tokenizer, which then will be loaded here.')
-
         # Monolingual files.
         self.files = []
         mono_data_dir = os.path.join(CONST_DATA_DIR, lang)
         if os.path.exists(mono_data_dir):
-            self.files.extend(get_files(mono_data_dir))
+            self.files.extend([os.path.join(mono_data_dir, mono_file) for mono_file in get_files(mono_data_dir)])
 
         if other_lang is not None:
             # Parallel corpus data dir.
