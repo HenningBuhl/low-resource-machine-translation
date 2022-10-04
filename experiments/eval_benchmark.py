@@ -51,12 +51,6 @@ def main():
     print(f'Arguments:')
     print(args)
 
-    # Adjust arguments for test purposes.
-    if args.dev_run True:  # Quickly turn on and off with 'and True/False'.
-        #args.dev_run = True
-        #args.fresh_run = True
-        print('Adjusted args in notebook')
-
     ########################
     # Setup.
     ########################

@@ -29,11 +29,7 @@ def main():
     # TODO add inference methods, their args and metrics.
 
     # Parse args.
-    if is_notebook():
-        sys.argv = ['-f']  # Used to make argparse work in jupyter notebooks (all args must be optional).
-        args, _ = parser.parse_known_args()  # -f can lead to unknown argument.
-    else:
-        args = parser.parse_args()
+    args = parser.parse_args()
 
     # Set seed.
     from pytorch_lightning import seed_everything

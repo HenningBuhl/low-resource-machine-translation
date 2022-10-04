@@ -66,15 +66,6 @@ def main():
     print(f'Arguments:')
     print(args)
 
-    # Adjust arguments for test purposes.
-    if args.dev_run and True:  # Quickly turn on and off with 'and True/False'.
-        #args.fresh_run = True
-        args.batch_size = 10
-        args.max_examples = 100
-        args.num_val_examples = 10
-        args.num_test_examples = 10
-        print('Adjusted args for test purposes.')
-
     ########################
     # Setup.
     ########################
