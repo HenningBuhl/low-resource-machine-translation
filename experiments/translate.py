@@ -22,11 +22,12 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Run.
-    parser.add_argument('--model-path', default='models/model', type=str, help='The path of the model to use.')
     parser.add_argument('--text', default='example', type=str, help='The text to translate.')
+    parser.add_argument('--model-path', default='models/model', type=str, help='The path of the model to use.')
     parser.add_argument('--seed', default=0, type=int, help='The random seed of the program.')
 
-    # TODO add inference methods, their args and metrics.
+    # TODO Add option to use a text file as input, translate all lines and save the results in a file again.
+    # TODO Add inference methods, their args.
 
     # Parse args.
     args = parser.parse_args()
