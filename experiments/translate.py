@@ -3,18 +3,15 @@ import sys
 sys.path.insert(0, '../src')
 
 # From packages.
+import os
 import pytorch_lightning as pl
 import argparse
 from distutils.util import strtobool
 
 # From repository.
-from arg_manager import *
+from arg_manager import ArgManager
 from constants import *
-from data import *
-from layers import *
-from metric_logging import *
-from plotting import *
-from tokenizer import *
+from tokenizer import TokenizerBuilder
 from transformer import *
 from util import *
 
