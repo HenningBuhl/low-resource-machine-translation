@@ -14,7 +14,7 @@
     * [Reverse Step-wise Pivoting](#reverse-step-wise-pivoting)
     * [Benchmark](#benchmark)
   * [Results](#results)
-    * [Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet](#effects-of-pivoting-in-a-low-resource-setting-with--german-dutch-english--as--source-pivot-target--triplet)
+    * [Pivoting with German-Dutch-English](#pivoting-with-german-dutch-english)
   * [Credit](#credit)
   * [To-Dos](#to-dos)
   * [Contributing](#contributing)
@@ -113,7 +113,7 @@ The `max-examples` is again a good argument to adjust in various runs to test th
 To train the step 2 model, use the following command
 
 ```
-python train_one_to_one.py --name sw-nl-en-step-2 --src-lang nl --tgt-lang en --encoder-model-path models/baseline-de-nl --freeze-encoder True
+python train_one_to_one.py --name psw-nl-en-step-2 --src-lang nl --tgt-lang en --encoder-model-path models/baseline-de-nl --freeze-encoder True
 ```
 
 Then perform direct pivoting on the decoder from step 2 and the encoder from the step 1 model.
@@ -123,7 +123,7 @@ Then perform direct pivoting on the decoder from step 2 and the encoder from the
 Reverse step-wise pivoting is similar to step-wise pivoting but freezes the decoder instead of the encoder. To train the step 2 model, use the following command
 
 ```
-python train_one_to_one.py --name rsw-de-nl-step-2 --src-lang de --tgt-lang nl --decoder-model-path models/baseline-nl-en --freeze-decoder True
+python train_one_to_one.py --name rswp-de-nl-step-2 --src-lang de --tgt-lang nl --decoder-model-path models/baseline-nl-en --freeze-decoder True
 ```
 
 Then perform direct pivoting on the encoder from step 2 and the decoder from the step 1 model.
@@ -184,7 +184,7 @@ python eval_benchmark.py
 
 ## Results
 
-### Effects of Pivoting in a low-resource setting with (German-Dutch-English) as (source-pivot-target) triplet
+### Pivoting with German-Dutch-English
 
 <details><summary>Results</summary>
 
