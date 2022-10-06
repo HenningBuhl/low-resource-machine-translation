@@ -88,6 +88,14 @@ The sh-script also support additional arguments (these are in SNAKE_NOTATION) an
 
 Some experiments require preexisting models. When the following sections mention a model being 'saved', it means that a `model.pt` file and an `args.json` file are placed in a directory. This directory can then be used as a `model_path` (or similarly named arguments). It is recommended to save all your models in the `experiments/models` directory for later benchmarking.
 
+### Train a Tokenizer
+
+Tokenizers are trained on the fly when a model is trained. If you want to train a tokenizer on a specific set of data you can do that with the `train_tokenizer` python script. Tokenizers will be saved and loaded automatically if they exist. To train a tokenizer on the data present in `experiments/data/{lang}` execute the following command.
+
+```
+python train_tokenizer.py --lang de
+```
+
 ### Train a one-to-one Model
 
 This command will train a simple model that translates from the src_lang to the tgt_lang.
