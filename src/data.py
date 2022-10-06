@@ -64,6 +64,12 @@ class ParallelDataPreProcessor():
 
         # Zip data into list of sentence pairs.
         pairs = list(zip(src_sentences, tgt_sentences))
+        num_pairs = len(pairs)
+
+        # Clean sentences.
+        pairs = [(s.strip(' '), t.strip(' ')) for s, t in pairs]  # Strip sentences.
+        pairs = [(s, t) for s, t in pairs if s != '\n' and t != '\n']  # Remove empty sentences.
+        print(f'Cleaned data - removed {num_pairs - len(pairs)} sentence pairs.')
 
         # Shuffle data.
         if shuffle:
