@@ -229,7 +229,7 @@ def main():
     model.save(os.path.join(model_dir, 'model.pt'))
 
     # Testing.
-    test_metrics = trainer.test(model, dataloaders=test_dataloader)
+    trainer.test(model, dataloaders=test_dataloader)
 
     # Save recorded metrics.
     metric_logger.manual_save(metrics_dir)
