@@ -217,12 +217,12 @@ class Transformer(pl.LightningModule):
                 decoder_layer.feed_forward.dropout.p = dropout
                 decoder_layer.dropout_3.p = dropout
     
-    def receive_encoder(self, encoder_model):
+    def set_encoder(self, encoder_model):
         '''Sets the encoder of this model to the encoder of the given model.'''
         self.src_embedding = encoder_model.src_embedding
         self.encoder = encoder_model.encoder
 
-    def receive_decoder(self, decoder_model):
+    def set_decoder(self, decoder_model):
         '''Sets the decoder of this model to the decoder of the given model.'''
         self.tgt_embedding = decoder_model.tgt_embedding
         self.decoder = decoder_model.decoder
