@@ -29,6 +29,7 @@ def main():
     parser.add_argument('--fresh-run', default=False, type=strtobool, help='Ignores all cashed data on disk, reruns generation and overwrites everything.')
     parser.add_argument('--vocab-size', default=16000, type=int, help='The vocabulary size of the tokenizer.')
     parser.add_argument('--char-coverage', default=1.0, type=float, help='The character coverage (percentage) of the tokenizer.')
+    parser.add_argument('--seed', default=0, type=int, help='The random seed of the program.')
 
     # Parse args.
     args = parser.parse_args()
@@ -36,6 +37,9 @@ def main():
     # Print args.
     print(f'Arguments:')
     print(args)
+    
+    # Set seed.
+    set_seed(args.seed)
 
     # Create tokenizers dir.
     create_dir(CONST_TOKENIZERS_DIR)

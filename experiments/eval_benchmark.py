@@ -56,8 +56,7 @@ def main():
     ########################
 
     # Set seed.
-    from pytorch_lightning import seed_everything
-    seed_everything(args.seed, workers=True)
+    set_seed(args.seed)
 
     # Create runs dir.
     create_dirs(CONST_RUNS_DIR)

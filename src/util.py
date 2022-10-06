@@ -1,4 +1,5 @@
 from datetime import datetime
+from pytorch_lightning import seed_everything
 
 
 import json
@@ -55,6 +56,9 @@ def get_time_as_string():
     now = datetime.now()
     date_time = now.strftime("%Y.%m.%d-%H.%M.%S")
     return date_time
+
+def set_seed(seed):
+    seed_everything(seed, workers=True)
 
 def is_notebook():
     '''Checks whether the current environment is a jupyter notebook.'''
