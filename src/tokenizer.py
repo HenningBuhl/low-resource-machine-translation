@@ -56,6 +56,7 @@ class TokenizerBuilder():
                     --model_type={}"
                     #--input_sentence_size={} \  # TODO Add and test.
                     #--shuffle_input_sentence={} \  # TODO add and test.
+                    # TODO is seed argument available?
 
             config = template.format(','.join(self.files),
                                     pad_id,
