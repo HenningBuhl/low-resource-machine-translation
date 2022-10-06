@@ -10,6 +10,7 @@ from distutils.util import strtobool
 
 # From repository.
 from arg_manager import ArgManager
+from callbacks import *
 from constants import *
 from data import ParallelDataPreProcessor
 from metric_logging import MetricLogger
@@ -165,35 +166,15 @@ def main():
 
     # Create callbacks and loggers.
     callbacks = []
-
     if args.enable_checkpointing:
-        model_checkpoint = pl.callbacks.ModelCheckpoint(
-            monitor=args.monitor,
-            dirpath=checkpoint_dir,
-            filename='{epoch}-{step}-{val_loss:.2f}',
-            save_top_k=1,
-            save_last=True,
-            every_n_epochs=1,
-            verbose=True,
-        )
-        callbacks.append(model_checkpoint)
+        mcc = get_model_checkpoint_callback(args.monitor, checkpoint_dir)
+        callbacks.append(mcc)
 
     if args.enable_early_stopping:
-        early_stopping_callback = pl.callbacks.EarlyStopping(
-            monitor=args.monitor,
-            min_delta=args.min_delta,
-            patience=args.patience,
-            mode=args.mode,
-            verbose=True,
-        )
-        callbacks.append(early_stopping_callback)
+        callbacks.append(get_early_stopping_callback(args.monitor, args.min_delta, args.patience, args.mode))
 
     if args.enable_scheduling:
-        lr_monitor = pl.callbacks.LearningRateMonitor(
-            logging_interval='step',
-            log_momentum=True
-        )
-        callbacks.append(lr_monitor)
+        callbacks.append(get_lr_monitor_callback())
 
     # Create metric logger.
     metric_logger = MetricLogger()
@@ -223,8 +204,7 @@ def main():
 
     # Save model.
     if args.enable_checkpointing:
-        model.load_from_checkpoint(model_checkpoint.best_model_path)
-
+        model.load_from_checkpoint(mcc.best_model_path)
     model.save(os.path.join(model_dir, 'model.pt'))
 
     # Testing.
