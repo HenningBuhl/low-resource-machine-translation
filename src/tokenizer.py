@@ -54,6 +54,8 @@ class TokenizerBuilder():
                     --vocab_size={} \
                     --character_coverage={} \
                     --model_type={}"
+                    #--input_sentence_size={} \  # TODO Add and test.
+                    #--shuffle_input_sentence={} \  # TODO add and test.
 
             config = template.format(','.join(self.files),
                                     pad_id,
