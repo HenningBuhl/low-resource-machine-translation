@@ -143,19 +143,19 @@ def main():
     if args.encoder_model_path is not None:
         encoder_model = load_model_from_path(args.encoder_model_path)
         model.receive_encoder(encoder_model)
-        if args.freeze_encoder:
-            model.freeze_encoder()
-        else:
+        if not args.freeze_encoder:
             model.set_dropout(args.dropout, skip_decoder=True)
+    if args.freeze_encoder:
+        model.freeze_encoder()
 
     # Stitch decoder.
     if args.decoder_model_path is not None:
         decoder_model = load_model_from_path(args.decoder_model_path)
         model.receive_decoder(decoder_model)
-        if args.freeze_decoder:
-            model.freeze_decoder()
-        else:
+        if not args.freeze_decoder:
             model.set_dropout(args.dropout, skip_encoder=True)
+    if args.freeze_decoder:
+        model.freeze_decoder()
 
     # Save untrained model.
     model.save(os.path.join(model_dir, 'model-untrained.pt'))
