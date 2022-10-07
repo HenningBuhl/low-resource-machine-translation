@@ -8,7 +8,7 @@
   * [Installation](#installation)
   * [Getting started](#getting-started)
   * [Experiments](#experiments)
-    * [Train a Baseline Model](#train-a-baseline-model)
+    * [Train a one-to-one Model](#train-a-one-to-one-model)
     * [Direct Pivoting](#direct-pivoting)
     * [Step-wise Pivoting](#step-wise-pivoting)
     * [Reverse Step-wise Pivoting](#reverse-step-wise-pivoting)
@@ -146,8 +146,8 @@ For benchmarking, save all the models to be benchmarked in the `experiments/mode
     "src_lang": "de",
     "pvt_lang": "nl",
     "tgt_lang": "en",
-    "src_pvt_model_path": "baseline-de-nl",
-    "pvt_tgt_model_path": "baseline-nl-en"
+    "src_pvt_model_path": "models/baseline-de-nl",
+    "pvt_tgt_model_path": "models/baseline-nl-en"
 }
 ```
 
