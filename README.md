@@ -121,7 +121,7 @@ The `max-examples` is again a good argument to adjust in various runs to test th
 To train the step 2 model, use the following command
 
 ```
-python train_one_to_one.py --name psw-nl-en-step-2 --src-lang nl --tgt-lang en --encoder-model-path models/baseline-de-nl --freeze-encoder True
+python train_one_to_one.py --name swp-nl-en-step-2 --src-lang nl --tgt-lang en --encoder-model-path models/baseline-de-nl --freeze-encoder True
 ```
 
 Then perform direct pivoting on the decoder from step 2 and the encoder from the step 1 model.
