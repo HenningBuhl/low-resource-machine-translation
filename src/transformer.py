@@ -15,6 +15,7 @@ import pytorch_lightning as pl
 import copy
 
 
+# TODO create seq2seqone2one model superclass setup?
 class Transformer(pl.LightningModule):
     '''A class implementing a transformer used for machine translation.'''
     def __init__(self,
