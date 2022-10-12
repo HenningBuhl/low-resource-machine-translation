@@ -42,6 +42,7 @@ class Transformer(pl.LightningModule):
                  track_chrf=False,
                  ):
         super().__init__()
+        # Params.
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.beta_1 = beta_1
@@ -54,11 +55,13 @@ class Transformer(pl.LightningModule):
         self.max_len = max_len
         self.label_smoothing = label_smoothing
 
+        # Tokenizers.
         self.src_tokenizer = src_tokenizer
         self.tgt_tokenizer = tgt_tokenizer
         self.src_vocab_size = src_vocab_size if src_vocab_size is not None else self.src_tokenizer.vocab_size()
         self.tgt_vocab_size = tgt_vocab_size if tgt_vocab_size is not None else self.tgt_tokenizer.vocab_size()
 
+        # Layers.
         self.src_embedding = nn.Embedding(self.src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_size, d_model)
         self.positional_encoder = PositionalEncoder(d_model, max_len)
@@ -68,23 +71,18 @@ class Transformer(pl.LightningModule):
         self.softmax = nn.LogSoftmax(dim=-1)
 
         # Metrics.
-        self.tracked_metrics = ['loss']
-
-        self.track_bleu = track_bleu
-        if self.track_bleu:
-            self.tracked_metrics.append('bleu')
-            self.bleu_metric = get_bleu_metric()
-
-        self.track_ter = track_ter
-        if self.track_ter:
-            self.tracked_metrics.append('ter')
-            self.ter_metric = get_ter_metric()
-
-        self.track_chrf = track_chrf
-        if self.track_chrf:
-            self.tracked_metrics.append('chrf')
-            self.chrf_metric = get_chrf_metric()
-
+        self.metrics = {}
+        if track_bleu:
+            metric_name, metric_fn = get_bleu_metric()
+            self.metrics[metric_name] = metric_fn
+        if track_ter:
+            metric_name, metric_fn = get_ter_metric()
+            self.metrics[metric_name] = metric_fn
+        if track_chrf:
+            metric_name, metric_fn = get_chrf_metric()
+            self.metrics[metric_name] = metric_fn
+        
+        # Init.
         self.init_params()
 
     def forward(self, src_input, tgt_input, e_mask=None, d_mask=None):
@@ -154,23 +152,15 @@ class Transformer(pl.LightningModule):
         )
         metrics = {f'{context}_loss': loss.item()}
 
-        if self.track_bleu or self.track_ter or self.track_chrf:
+        if len(self.metrics) > 0:
             predictions = self.tgt_tokenizer.Decode(torch.max(logits, dim=2).indices.tolist())
             references = self.tgt_tokenizer.Decode(tgt_out.tolist())
             references = [[r] for r in references]
-
-        if self.track_bleu:
-            bleu = self.bleu_metric(predictions, references).item()
-            metrics[f'{context}_bleu'] = bleu
-
-        if self.track_ter:
-            ter = self.ter_metric(predictions, references).item()
-            metrics[f'{context}_ter'] = ter
-
-        if self.track_chrf:
-            chrf = self.chrf_metric(predictions, references).item()
-            metrics[f'{context}_chrf'] = chrf
-
+            
+            for metric_key, metric_fn in self.metrics.items():
+                metric = metric_fn(predictions, references).item()
+                metrics[f'{context}_{metric_key}'] = metric
+        
         return loss, metrics
 
     # Util.

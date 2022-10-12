@@ -91,11 +91,14 @@ def main():
     # Which metrics to record.
     metrics = {}
     if args.track_bleu:
-        metrics['bleu'] = get_bleu_metric()
+        metric_name, metric_fn = get_bleu_metric()
+        metrics[metric_name] = metric_fn
     if args.track_ter:
-        metrics['ter'] = get_ter_metric()
+        metric_name, metric_fn = get_ter_metric()
+        metrics[metric_name] = metric_fn
     if args.track_chrf:
-        metrics['chrf'] = get_chrf_metric()
+        metric_name, metric_fn = get_chrf_metric()
+        metrics[metric_name] = metric_fn
     print(f'The following metrics are recorded: {metrics}')
 
     ########################
