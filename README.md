@@ -114,7 +114,7 @@ You need two models that can perform (src, pvt) and (pvt, tgt) respectively to p
 python train_one_to_one.py --name dp-de-nl-en --src-lang de --tgt-lang en --encoder-model-path models/baseline-de-nl --decoder-model-path models/baseline-nl-en
 ```
 
-The `max-examples` is again a good argument to adjust in various runs to test the effects that different amounts of data have on the performance.
+The `--max-examples` is again a good argument to adjust in various runs to test the effects that different amounts of data have on the performance.
 
 ### Step-wise Pivoting
 
