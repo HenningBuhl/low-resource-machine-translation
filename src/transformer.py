@@ -4,6 +4,7 @@ from torch.functional import F
 from constants import *
 from layers import *
 from data import pad_or_truncate
+from metrics import *
 from schedulers import WarumUpInverseSquareRootScheduler
 from util import *
 
@@ -72,17 +73,17 @@ class Transformer(pl.LightningModule):
         self.track_bleu = track_bleu
         if self.track_bleu:
             self.tracked_metrics.append('bleu')
-            self.bleu_metric = torchmetrics.SacreBLEUScore(tokenize='char')
+            self.bleu_metric = get_bleu_metric()
 
         self.track_ter = track_ter
         if self.track_ter:
             self.tracked_metrics.append('ter')
-            self.ter_metric = torchmetrics.TranslationEditRate()
+            self.ter_metric = get_ter_metric()
 
         self.track_chrf = track_chrf
         if self.track_chrf:
             self.tracked_metrics.append('chrf')
-            self.chrf_metric = torchmetrics.CHRFScore()
+            self.chrf_metric = get_chrf_metric()
 
         self.init_params()
 

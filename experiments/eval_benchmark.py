@@ -14,6 +14,7 @@ from distutils.util import strtobool
 from arg_manager import *
 from constants import *
 from data import *
+from metrics import *
 from layers import *
 from metric_logging import *
 from plotting import *
@@ -90,11 +91,11 @@ def main():
     # Which metrics to record.
     metrics = {}
     if args.track_bleu:
-        metrics['bleu'] = torchmetrics.SacreBLEUScore(tokenize='char')
+        metrics['bleu'] = get_bleu_metric()
     if args.track_ter:
-        metrics['ter'] = torchmetrics.TranslationEditRate()
+        metrics['ter'] = get_ter_metric()
     if args.track_chrf:
-        metrics['chrf'] = torchmetrics.CHRFScore()
+        metrics['chrf'] = get_chrf_metric()
     print(f'The following metrics are recorded: {metrics}')
 
     ########################
