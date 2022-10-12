@@ -158,7 +158,7 @@ def main():
                     translation = inference_fn(text, method, kwargs)
                     translations.append(translation)
 
-                # Save the translations produces with the medhot and kwargs.
+                # Save the translations produced with the method and kwargs.
                 with open(os.path.join(results_dir, f'{benchmark_name}.{model_name}.{method}{arg_str}.translations.txt'), 'w', encoding='utf8') as f:
                     f.write('n'.join(translations))
 
