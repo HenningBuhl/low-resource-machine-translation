@@ -196,7 +196,7 @@ python eval_benchmark.py
 
 <details><summary>Results</summary>
 
-The experiments used the WikiMatrix [[4]](#4) dataset.
+A German-English translation task with Dutch as pivot language. The experiments used the WikiMatrix [[4]](#4) dataset.
 
 | Language Pair  | Sentences |
 | -------------- | --------- |
@@ -247,7 +247,9 @@ The following table shows sources that influenced the code development of this r
 * Non-autoregressive Transformer (NAT)
 * Attention variations of transformers
 * Speed-up techniques of transformers
-* This repository [12](12) is a good source for resources and further experiments to implement
+* This repository [[12]](12) is a good source for resources and further experiments to implement
+* Investigate latent space in m+n scenario (numerical differences in mean/std between encoded language a and b)
+* How to expand translation systens to more languages (+ re-adjust tokenizers without disrupting model)
 
 ## Contributing
 
