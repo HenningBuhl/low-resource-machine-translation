@@ -72,7 +72,7 @@ You can either run the python files with your arguments
 python train_one_to_one.py --src-lang de --tgt-lang nl
 ```
 
-or use the run.sh-script. The script passes arguments to the python program. The script uses PascaslCase for those kind of arguments. Lists are passed comma separated.
+or use the run.sh-script. The script passes arguments to the python program. The script uses PascalCase for those kind of arguments. Lists are passed comma separated.
 
 ```
 bash run.sh EXPERIMENT=train_one_to_one SrcLang=de TgtLang=nl
