@@ -5,7 +5,7 @@ from constants import *
 from layers import *
 from data import pad_or_truncate
 from metrics import *
-from schedulers import WarumUpInverseSquareRootScheduler
+from schedulers import WarmUpInverseSquareRootScheduler
 from util import *
 
 import torchmetrics
@@ -114,7 +114,7 @@ class Transformer(pl.LightningModule):
 
         if self.enable_scheduling:
             scheduler = {
-                'scheduler': WarumUpInverseSquareRootScheduler(optimizer, self.d_model, self.warm_up_steps),
+                'scheduler': WarmUpInverseSquareRootScheduler(optimizer, self.d_model, self.warm_up_steps),
                 'interval': 'step',
                 'frequency': 1
             }
