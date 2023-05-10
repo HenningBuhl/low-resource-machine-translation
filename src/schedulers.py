@@ -3,7 +3,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 import torch
 
 
-class WarumUpInverseSquareRootScheduler(_LRScheduler):
+class WarmUpInverseSquareRootScheduler(_LRScheduler):
     '''A class implementing warm-up into inverse square root scheduling.'''
 
     def __init__(self, optimizer, d_model, warm_up_steps, factor=1, verbose=False):
@@ -11,7 +11,7 @@ class WarumUpInverseSquareRootScheduler(_LRScheduler):
         self.d_model = d_model
         self.warm_up_steps = warm_up_steps
         self.factor = factor
-        super(WarumUpInverseSquareRootScheduler, self).__init__(optimizer, verbose=verbose)  # TODO causes TypeError: super(type, obj): obj must be an instance or subtype of type (must restart kernel).
+        super(WarmUpInverseSquareRootScheduler, self).__init__(optimizer, verbose=verbose)  # TODO causes TypeError: super(type, obj): obj must be an instance or subtype of type (must restart kernel).
 
     def get_lr(self):
         for g in self.optimizer.param_groups:
