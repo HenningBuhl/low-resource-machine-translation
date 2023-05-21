@@ -227,7 +227,7 @@ The following table shows sources that influenced the code development of this r
 | [[5]](#5) | bigs parts of the transformer class (and all its layers) + beam search + SentencePiece training |
 | [[6]](#6) | Top-K and top-p filtering function |
 
-## To-Dos
+## TODOs
 
 * Cross lingual encoder [[2]](#2)
 * Use encoders of different but similar languages (e.g. German-X encoder for Dutch-X translation) either frozen or unfrozen and observe the effects
